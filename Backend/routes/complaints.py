@@ -67,6 +67,15 @@ async def submit_complaint(complaint: ComplaintCreate):
     # 5. Insert into MongoDB
     try:
         await db.db.complaints.insert_one(complaint_record)
+        
+        # 5.1 Increment worker task count for real-time allocation data
+        if worker_data:
+            await db.db.workers.update_one(
+                {"worker_id": worker_data["worker_id"]},
+                {"$inc": {"active_tasks": 1}}
+            )
+            print(f"Update: Incremented active_tasks for {worker_data['name']}")
+            
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database insertion failed: {e}")
 

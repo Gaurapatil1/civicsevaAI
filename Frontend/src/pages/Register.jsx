@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { register } from '../services/api';
 import './Auth.css';
-import { FaUser, FaLock, FaCity, FaEnvelope, FaCheckCircle, FaSearch } from 'react-icons/fa';
+import { FaUser, FaLock, FaCity, FaEnvelope, FaCheckCircle, FaSearch, FaPhone } from 'react-icons/fa';
 
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     password: '',
     city: ''
   });
@@ -70,6 +71,20 @@ const Register = () => {
                     placeholder="Enter your full name"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    required 
+                  />
+                </div>
+              </div>
+
+              <div className="gov-form-group">
+                <label>MOBILE NUMBER <span className="req">*</span></label>
+                <div className="input-with-icon">
+                  <FaPhone className="input-icon" />
+                  <input 
+                    type="tel" 
+                    placeholder="Enter 10 digit number"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
                     required 
                   />
                 </div>

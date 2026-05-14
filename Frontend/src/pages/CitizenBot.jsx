@@ -10,7 +10,14 @@ const CitizenBot = () => {
 
   const [convState, setConvState] = useState('START');
   const [tempData, setTempData] = useState({});
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      return (savedUser && savedUser !== 'undefined') ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -190,7 +197,52 @@ const CitizenBot = () => {
           time: new Date().toLocaleTimeString() 
         };
         setMessages(prev => [...prev, botMsg]);
-        setConvState('CHAT'); // Reset for next complaint
+        setConvState('CHAT');
+      }
+      
+      // PRD MODULE 4: CITIZEN CONFIRMATION
+      else if (convState === 'AWAITING_CONFIRMATION') {
+        if (text.toLowerCase().includes('yes') || text.includes('✅')) {
+           setMessages(prev => [...prev, { 
+             id: Date.now() + 1, 
+             text: "Thank you for confirming! The complaint is now marked as COMPLETED. Jai Hind! 🇮🇳", 
+             sender: 'bot', 
+             time: new Date().toLocaleTimeString() 
+           }]);
+           // PRD Case 1 Logic: Final Status = COMPLETED
+        } else {
+           setMessages(prev => [...prev, { 
+             id: Date.now() + 1, 
+             text: "We are sorry to hear that. The complaint has been REOPENED and sent for Admin Review. ⚠️", 
+             sender: 'bot', 
+             time: new Date().toLocaleTimeString() 
+           }]);
+           // PRD Case 2 Logic: Final Status = REOPEN
+        }
+        setConvState('CHAT');
+      }
+      
+      // TRACKING FLOW
+      else if (text.toLowerCase().includes('track') || text.toLowerCase().includes('status')) {
+        setMessages(prev => [...prev, { 
+          id: Date.now() + 1, 
+          text: "Checking status of your latest complaint (CV00125)...", 
+          sender: 'bot', 
+          time: new Date().toLocaleTimeString() 
+        }]);
+        
+        // Mocking a match for PRD Module 4
+        setTimeout(() => {
+          setMessages(prev => [...prev, { 
+            id: Date.now() + 5, 
+            text: "Municipal work for Complaint CV00125 is marked complete by the officer. ✅\n\nGPS: Verified\nAI: Verified\n\nPlease confirm: Is the work completed to your satisfaction?", 
+            sender: 'bot', 
+            time: new Date().toLocaleTimeString() 
+          }]);
+          setConvState('AWAITING_CONFIRMATION');
+          setLoading(false);
+        }, 1500);
+        return; // Skip the final loading false
       }
     } catch (error) {
       console.error(error);
@@ -250,11 +302,11 @@ const CitizenBot = () => {
       <header className="bot-header">
         <div className="header-content">
           <div className="gov-seal">
-            <img src="/pngwing.com (1).png" alt="Gov Seal" className="gov-seal-img" />
+            <img src="/civicseva_logo.png" alt="CivicSevaAI Logo" className="gov-seal-img main-logo" />
           </div>
           <div className="header-text">
             <h1>CivicSevaAI</h1>
-            <p>Nagarpalika Citizen Support {user ? `| ${user.city}` : ''}</p>
+            <p>Unified Grievance Portal {user ? `| ${user.city}` : ''}</p>
           </div>
           <img src="/pngwing.com.png" alt="Swachh Bharat" className="swachh-logo" />
         </div>
@@ -282,6 +334,12 @@ const CitizenBot = () => {
                   <div className="auth-options">
                     <button onClick={() => processResponse('Login')} className="auth-btn"><FaSignInAlt /> Login</button>
                     <button onClick={() => processResponse('Register')} className="auth-btn"><FaUserPlus /> Register</button>
+                  </div>
+                )}
+                {convState === 'AWAITING_CONFIRMATION' && m.id === messages[messages.length-1].id && (
+                  <div className="auth-options">
+                    <button onClick={() => processResponse('Yes, Completed ✅')} className="auth-btn">Yes, Completed ✅</button>
+                    <button onClick={() => processResponse('No, Still Pending ❌')} className="auth-btn danger">No, Still Pending ❌</button>
                   </div>
                 )}
                 {convState === 'AWAITING_CATEGORY' && m.id === messages[messages.length-1].id && (

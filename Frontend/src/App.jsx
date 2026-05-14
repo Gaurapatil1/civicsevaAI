@@ -3,20 +3,23 @@ import CitizenBot from './pages/CitizenBot';
 import AdminDashboard from './pages/AdminDashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import OTPVerification from './pages/OTPVerification';
-import JanSuvidha from './pages/JanSuvidha';
+import WorkerDashboard from './pages/WorkerDashboard';
 import './App.css';
 
 // Protected Route for Officers/Admins
-const AdminRoute = ({ children }) => {
+const AdminRoute = ({ children, role }) => {
   let user = null;
   try {
-    user = JSON.parse(localStorage.getItem('user'));
+    const savedUser = localStorage.getItem('user');
+    if (savedUser && savedUser !== 'undefined') {
+      user = JSON.parse(savedUser);
+    }
   } catch (e) {
     console.error("Auth error", e);
   }
   
-  if (!user || user.role !== 'admin') return <Navigate to="/login" />;
+  if (!user) return <Navigate to="/login" />;
+  if (role && user.role !== role) return <Navigate to="/login" />;
   return children;
 };
 
@@ -28,17 +31,16 @@ function App() {
           <Route path="/" element={<CitizenBot />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/otp-verification" element={<OTPVerification />} />
           
           <Route path="/admin" element={
-            <AdminRoute>
+            <AdminRoute role="admin">
               <AdminDashboard />
             </AdminRoute>
           } />
 
-          <Route path="/officer" element={
-            <AdminRoute>
-              <JanSuvidha />
+          <Route path="/worker-dashboard" element={
+            <AdminRoute role="worker">
+              <WorkerDashboard />
             </AdminRoute>
           } />
 

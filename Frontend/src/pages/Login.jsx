@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../services/api';
 import './Auth.css';
-import { FaUser, FaLock, FaCheckCircle, FaSearch } from 'react-icons/fa';
+import { FaUser, FaLock, FaCheckCircle, FaSearch, FaSignOutAlt } from 'react-icons/fa';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -26,8 +26,12 @@ const Login = () => {
       localStorage.setItem('user', JSON.stringify(data.user));
       localStorage.setItem('token', data.token);
       
-      // Navigate to OTP verification for security
-      navigate('/otp-verification');
+      // Navigate based on PRD roles
+      if (data.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/worker-dashboard');
+      }
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
     } finally {
@@ -39,16 +43,26 @@ const Login = () => {
     <div className="gov-auth-wrapper">
       {/* Top Navbar */}
       <nav className="gov-navbar">
-        <div className="nav-container">
-          <div className="nav-links">
-            <Link to="/"><div className="nav-item active">HOME</div></Link>
-            <div className="nav-item">ABOUT US</div>
-            <Link to="/admin"><div className="nav-item">DASHBOARD</div></Link>
-            <div className="nav-item">CONTACT</div>
-            <div className="nav-item">HELP</div>
+        <div className="nav-container header-logos">
+          <div className="logo-group">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="GOI" className="gov-logo-img" />
+            <div className="logo-separator"></div>
+            <img src="/civicseva_logo.png" alt="CivicSeva" className="project-logo-img" />
+            <div className="logo-text-desktop">
+               <span className="gov-title">Government of India</span>
+               <span className="project-title">CivicSevaAI Portal</span>
+            </div>
           </div>
-          <div className="nav-search">
-             <FaSearch /> <input type="text" placeholder="Search Services..." />
+          
+          <div className="nav-actions">
+            {localStorage.getItem('user') && (
+              <button onClick={() => { localStorage.clear(); window.location.reload(); }} className="nav-logout-btn">
+                <FaSignOutAlt /> LOGOUT
+              </button>
+            )}
+            <div className="nav-search-minimal">
+               <FaSearch />
+            </div>
           </div>
         </div>
       </nav>

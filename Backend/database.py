@@ -105,6 +105,7 @@ async def connect_to_mongo():
             except Exception as e:
                 logger.warning(f"⚠️ Atlas unreachable: {e}. Switching to OFFLINE Mock Mode.")
                 db.db = MockDB()
+                await seed_mock_data()
                 logger.info("🚀 OFFLINE Mock Database (In-Memory) ready for demo.")
         else:
             logger.info(f"🔌 Connecting to MongoDB: {DATABASE_NAME}...")
@@ -135,6 +136,19 @@ async def seed_mock_data():
                 "email": admin_email,
                 "password": "123456",
                 "role": "admin",
+                "city": "Mumbai",
+                "created_at": datetime.now()
+            })
+        
+        # 1.1 Worker User
+        worker_email = "worker@gov.in"
+        existing_worker = await db.db.users.find_one({"email": worker_email})
+        if not existing_worker:
+            await db.db.users.insert_one({
+                "name": "Amit Worker",
+                "email": worker_email,
+                "password": "worker123",
+                "role": "worker",
                 "city": "Mumbai",
                 "created_at": datetime.now()
             })
