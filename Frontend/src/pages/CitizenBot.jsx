@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api, { submitComplaint, login, register } from '../services/api';
+import api, { submitComplaint, login, register, predictCategory } from '../services/api';
 import './CitizenBot.css';
 import { FiSend, FiUser, FiInfo, FiCheckCircle, FiShield, FiLogOut } from 'react-icons/fi';
 
@@ -37,6 +37,29 @@ const CitizenBot = () => {
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const finalizeSubmission = async (response) => {
+    const cid = response.id;
+    setTempData({ ...tempData, current_complaint_id: cid });
+    setMessages(prev => [...prev, { 
+      id: Date.now()+2, 
+      text: `Your grievance has been officially registered with the command center.\n\n📄 Ref ID: ${cid.slice(-6).toUpperCase()}\n👷 Assigned Operative: ${response.assigned_worker ? response.assigned_worker.name : 'System Allocation Pending'}\n⚠️ Priority Level: ${response.priority}\n\nYou will be notified as soon as our field staff begins work.`, 
+      sender: 'bot', 
+      time: new Date().toLocaleTimeString() 
+    }]);
+    setConvState('CHAT');
+
+    // SIMULATE RESOLUTION FOR DEMO
+    setTimeout(() => {
+        setMessages(prev => [...prev, {
+            id: Date.now()+30,
+            text: "Official Update: Your complaint has been resolved successfully by Amit Patil.\n\nNote: 'Repaired and verified.'\nProof: resolution_proof.jpg\n\nPlease rate your experience with us.",
+            sender: 'bot',
+            time: new Date().toLocaleTimeString()
+        }]);
+        setConvState('AWAITING_RATING');
+    }, 10000);
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -100,37 +123,33 @@ const CitizenBot = () => {
           setConvState('CHAT');
       }
       else if (convState === 'CHAT') {
-        setTempData({ ...tempData, complaint_text: text });
+        const pred = await predictCategory(text);
+        setTempData({ ...tempData, complaint_text: text, pred_category: pred.category, pred_priority: pred.priority });
         setMessages(prev => [...prev, { 
           id: Date.now()+1, 
-          text: "I understand the issue. To ensure this is routed to the correct municipal department, please select the most relevant category from the options below:", 
+          text: `I've analyzed your request. 📊 AI Prediction:\n\nCategory: ${pred.category}\nPriority: ${pred.priority}\n\nIs this classification correct?`, 
           sender: 'bot', 
           time: new Date().toLocaleTimeString() 
         }]);
-        setConvState('AWAITING_CATEGORY');
+        setConvState('AWAITING_PREDICTION_CONFIRM');
+      }
+      else if (convState === 'AWAITING_PREDICTION_CONFIRM') {
+        if (text.toLowerCase() === 'yes') {
+            const response = await submitComplaint(tempData.complaint_text, tempData.pred_category, user.name, user.city);
+            await finalizeSubmission(response);
+        } else {
+            setMessages(prev => [...prev, { 
+              id: Date.now()+1, 
+              text: "Apologies for the miscalculation. Please select the correct category manually from the list below:", 
+              sender: 'bot', 
+              time: new Date().toLocaleTimeString() 
+            }]);
+            setConvState('AWAITING_CATEGORY');
+        }
       }
       else if (convState === 'AWAITING_CATEGORY') {
         const response = await submitComplaint(tempData.complaint_text, text, user.name, user.city);
-        const cid = response.id;
-        setTempData({ ...tempData, current_complaint_id: cid });
-        setMessages(prev => [...prev, { 
-          id: Date.now()+2, 
-          text: `Your grievance has been officially registered with the command center.\n\n📄 Ref ID: ${cid.slice(-6).toUpperCase()}\n👷 Assigned Operative: ${response.assigned_worker ? response.assigned_worker.name : 'System Allocation Pending'}\n⚠️ Priority Level: ${response.priority}\n\nYou will be notified as soon as our field staff begins work.`, 
-          sender: 'bot', 
-          time: new Date().toLocaleTimeString() 
-        }]);
-        setConvState('CHAT');
-
-        // SIMULATE RESOLUTION FOR DEMO
-        setTimeout(() => {
-            setMessages(prev => [...prev, {
-                id: Date.now()+10,
-                text: "Your complaint has been resolved successfully. Amit Patil has updated the task.\n\nNote: 'Water leakage repaired successfully.'\nProof Image: resolution_proof.jpg\n\nPlease rate your experience with us.",
-                sender: 'bot',
-                time: new Date().toLocaleTimeString()
-            }]);
-            setConvState('AWAITING_RATING');
-        }, 8000);
+        await finalizeSubmission(response);
       }
     } catch (e) {
       setMessages(prev => [...prev, { id: Date.now()+1, text: "We are currently experiencing technical difficulties. Please try again later.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
@@ -208,6 +227,12 @@ const CitizenBot = () => {
                 {/* Official Action Buttons */}
                 {m.id === messages[messages.length-1].id && !loading && (
                     <>
+                      {convState === 'AWAITING_PREDICTION_CONFIRM' && (
+                        <div className="auth-options">
+                          <button onClick={() => processResponse('Yes')} className="auth-btn">Yes, Correct</button>
+                          <button onClick={() => processResponse('No')} className="auth-btn" style={{background: '#64748b'}}>No, Change</button>
+                        </div>
+                      )}
                       {convState === 'AWAITING_AUTH_CHOICE' && (
                         <div className="auth-options">
                           <button onClick={() => processResponse('Log In')} className="auth-btn">Log In</button>

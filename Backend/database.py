@@ -7,41 +7,37 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Use Environment Variable or Fallback to Local Mock
+# Configuration
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 DB_NAME = "civicseva_db"
 
-class MockDB:
-    """In-memory fallback if MongoDB is unavailable"""
+class Database:
     def __init__(self):
-        self.complaints = []
-        self.workers = []
-        self.users = []
-    
-    async def insert_one(self, collection, data):
-        data['_id'] = str(len(collection))
-        collection.append(data)
-        return data
+        self.client = None
+        self.db = None
 
-    async def find_one(self, collection, query):
-        for item in collection:
-            match = True
-            for k, v in query.items():
-                if item.get(k) != v: match = False
-            if match: return item
-        return None
+db = Database()
 
-# Database Connection
-client = AsyncIOMotorClient(MONGO_URI)
-db = client[DB_NAME]
+async def connect_to_mongo():
+    db.client = AsyncIOMotorClient(MONGO_URI)
+    db.db = db.client[DB_NAME]
+    print(f"✅ Connected to MongoDB: {MONGO_URI}")
+
+async def close_mongo_connection():
+    if db.client:
+        db.client.close()
+        print("Disconnected from MongoDB.")
 
 async def seed_data():
     """Seeds the database with real dataset and demo users."""
+    if db.db is None:
+        await connect_to_mongo()
+        
     try:
         # 1. Clear existing demo data
-        await db.workers.delete_many({})
-        await db.users.delete_many({})
-        await db.complaints.delete_many({})
+        await db.db.workers.delete_many({})
+        await db.db.users.delete_many({})
+        # Note: We keep complaints to avoid clearing user submissions during testing
         
         # 2. Seed Workers from municipality_employees.csv
         base_path = os.path.dirname(os.path.abspath(__file__))
@@ -53,15 +49,15 @@ async def seed_data():
             for _, row in df.iterrows():
                 dept = row['Department']
                 # Categorization logic
-                if 'Water' in dept: d = "Water Supply"
-                elif 'Electricity' in dept: d = "Electricity"
-                elif 'Waste' in dept: d = "Waste Management"
-                elif 'Road' in dept: d = "Roads/Potholes"
+                if 'Water' in str(dept): d = "Water Supply"
+                elif 'Electricity' in str(dept): d = "Electricity"
+                elif 'Waste' in str(dept): d = "Waste Management"
+                elif 'Road' in str(dept): d = "Roads/Potholes"
                 else: d = "Sanitation"
 
                 workers_list.append({
                     "name": row['Name'],
-                    "email": row['Email'].lower(),
+                    "email": str(row['Email']).lower(),
                     "role": "worker",
                     "dept": d,
                     "password": "hashed_password",
@@ -73,11 +69,11 @@ async def seed_data():
                 })
             
             if workers_list:
-                await db.workers.insert_many(workers_list[:40])
+                await db.db.workers.insert_many(workers_list[:40])
                 print(f"✅ Seeded {len(workers_list[:40])} workers from employees dataset.")
 
         # 3. Seed Admin and Test Worker Account
-        await db.users.insert_many([
+        await db.db.users.insert_many([
             {
                 "name": "Chief Administrator",
                 "email": "admin@civicseva.gov",
@@ -99,7 +95,7 @@ async def seed_data():
         complaints_csv = os.path.join(base_path, "data", "complaints_dataset.csv")
         if os.path.exists(complaints_csv):
             df_c = pd.read_csv(complaints_csv)
-            sample_c = df_c.sample(20)
+            sample_c = df_c.sample(min(20, len(df_c)))
             seeded_c = []
             for _, row in sample_c.iterrows():
                 seeded_c.append({
@@ -112,10 +108,9 @@ async def seed_data():
                     "created_at": datetime.now(),
                     "assigned_worker": None
                 })
-            await db.complaints.insert_many(seeded_c)
+            if seeded_c:
+                await db.db.complaints.insert_many(seeded_c)
 
         print("✅ Database Seeding Complete.")
     except Exception as e:
         print(f"❌ Seeding Error: {e}")
-
-# Call seeding on startup in main.py

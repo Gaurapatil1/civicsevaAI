@@ -12,6 +12,15 @@ import uuid
 
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
+@router.post("/predict")
+async def predict_complaint(complaint: ComplaintCreate):
+    """
+    Returns AI predicted category and priority for a given message.
+    Used for UI verification before final submission.
+    """
+    category, priority = predict_category_and_priority(complaint.message)
+    return {"category": category, "priority": priority}
+
 @router.post("/submit-complaint", status_code=status.HTTP_201_CREATED)
 async def submit_complaint(complaint: ComplaintCreate):
     """

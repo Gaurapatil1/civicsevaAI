@@ -19,6 +19,11 @@ export const register = async (userData) => {
   return response.data;
 };
 
+export const predictCategory = async (message) => {
+  const response = await api.post('/complaints/predict', { message, citizen_name: 'guest', city: 'Mumbai' });
+  return response.data;
+};
+
 export const submitComplaint = async (message, category = null, citizen_name, city) => {
   const response = await api.post('/complaints/submit-complaint', { 
     message, 
