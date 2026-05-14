@@ -1,224 +1,324 @@
-# CivicSevaAI — Product Requirements Document (PRD)
+# Product Requirements Document (PRD)
 
-**Version:** 1.0  
-**Date:** May 2026  
-**Status:** Draft  
-**Owner:** CivicSevaAI Product Team  
+# Project Name
 
----
+CivicSevaAI – Employee Work Verification & Citizen Confirmation System
 
-## 1. Executive Summary
+## 1. Purpose
 
-CivicSevaAI is an AI-powered municipal complaint management platform designed to help government offices operating under severe staff shortages intelligently prioritize, route, and resolve citizen grievances. By combining machine learning with smart workforce allocation, the platform reduces complaint resolution time, improves citizen satisfaction, and brings operational transparency to urban local bodies.
+CivicSevaAI is an AI-powered municipal assistance platform. This feature adds an employee work-verification process where municipal employees upload proof of completed work (photo + GPS location). The AI system validates whether the work is actually completed. Citizens are also asked to confirm whether the work has been completed.
 
 ---
 
-## 2. Problem Statement
+# 2. Problem Statement
 
-Municipal corporations across India face a systemic challenge: citizen complaints far outnumber available staff. Key pain points include:
+Currently municipal systems may mark complaints as completed without proper verification. Citizens may still face unresolved issues.
 
-- **No intelligent triage** — complaints are handled on a first-come, first-served basis regardless of urgency.
-- **Manual assignment** — supervisors waste time manually routing complaints to workers.
-- **No visibility** — citizens have no feedback loop; admins lack a real-time overview.
-- **Staff inefficiency** — overloaded workers and idle workers coexist due to poor allocation.
-- **Delayed resolution** — critical issues like water outages or road accidents wait in the same queue as low-priority requests.
+Examples:
 
----
+* Employee marks pothole repaired but repair is incomplete.
+* Garbage issue marked solved but garbage remains.
+* Street light marked fixed but still not functioning.
 
-## 3. Goals & Success Metrics
+The system requires:
 
-### Product Goals
-
-| Goal | Description |
-|------|-------------|
-| Faster resolution | Reduce average complaint resolution time by 40% |
-| Smart prioritization | Ensure Critical complaints are addressed within 2 hours |
-| Higher throughput | Enable the same number of workers to handle 30% more complaints |
-| Citizen trust | Provide real-time status updates to complainants |
-| Admin visibility | Give supervisors a single pane of glass for all complaints and workers |
-
-### Key Metrics (KPIs)
-
-| Metric | Target |
-|--------|--------|
-| Complaint resolution rate | > 80% within SLA |
-| AI categorization accuracy | > 90% |
-| Critical complaint response time | < 2 hours |
-| Worker utilization rate | > 75% |
-| Citizen satisfaction score | > 4.0 / 5.0 |
+1. Employee proof submission.
+2. AI verification.
+3. GPS verification.
+4. Citizen confirmation.
 
 ---
 
-## 4. Target Users
+# 3. Objectives
 
-### 4.1 Citizens
-Residents of a municipality who need to report civic issues such as broken roads, water supply failures, drainage overflow, or street light outages.
-
-**Needs:**
-- Simple, familiar complaint submission (WhatsApp-style)
-- Confirmation that their complaint was received and assigned
-- Status updates on resolution
-
-### 4.2 Municipal Administrators
-Supervisors and officers managing the complaint resolution workflow.
-
-**Needs:**
-- Real-time dashboard showing all complaints, priorities, and worker assignments
-- AI-predicted category and priority to reduce manual triage effort
-- Worker availability and workload visibility
-- SLA breach alerts
+* Reduce fake completion reports.
+* Improve transparency.
+* Increase citizen trust.
+* Verify employee work automatically.
+* Include citizen feedback before final closure.
 
 ---
 
-## 5. User Stories
+# 4. Stakeholders
 
-### Citizen Stories
+Primary Users:
 
-- As a citizen, I want to submit a complaint in plain language so that I don't need to fill complex forms.
-- As a citizen, I want to receive instant confirmation with a reference number so I know my complaint was logged.
-- As a citizen, I want to know which department and worker has been assigned so I have a point of contact.
+* Citizens
+* Municipal Employees
+* Municipal Admin
 
-### Admin Stories
+Secondary Users:
 
-- As an admin, I want the AI to automatically categorize and prioritize complaints so I can focus on oversight.
-- As an admin, I want to see which workers are available and their current task load so I can intervene if needed.
-- As an admin, I want to view complaints filtered by status, priority, and category so I can manage SLA compliance.
-- As an admin, I want analytics on complaint trends so I can plan resource deployment.
+* Department Heads
+* Government Authorities
 
 ---
 
-## 6. Features & Scope
+# 5. Functional Requirements
 
-### 6.1 In Scope (v1.0)
+## Module 1: Employee Work Submission
 
-| Feature | Description | Priority |
-|---------|-------------|----------|
-| WhatsApp-style complaint UI | Mobile-friendly chat interface for complaint submission | P0 |
-| AI complaint categorization | ML model classifying complaints into 7 departments | P0 |
-| AI priority prediction | 4-level urgency detection (Low / Medium / High / Critical) | P0 |
-| Smart worker allocation | Score-based automatic assignment to best available worker | P0 |
-| Admin dashboard | Real-time view of complaints, workers, and analytics | P0 |
-| Worker roster | Availability, active tasks, and department visibility | P1 |
-| Complaint status tracking | Open / In Progress / Resolved lifecycle | P1 |
-| JWT authentication | Secure admin login | P1 |
-| Chart analytics | Category breakdown and priority distribution charts | P2 |
+Employee flow:
 
-### 6.2 Out of Scope (v1.0)
+1. Open complaint assigned.
+2. Click "Mark Work Completed".
+3. Upload:
 
-- Real WhatsApp Business API integration
-- Multi-city / multi-tenant SaaS support
-- Multilingual complaint submission
-- Live GIS / map-based tracking
-- Native mobile apps (iOS / Android)
-- SMS / email notifications to citizens
+   * Work image
+   * GPS location
+   * Completion remarks
+4. Submit.
 
----
+System stores:
 
-## 7. Complaint Categories
-
-The AI model predicts complaints into the following 7 departments:
-
-1. Water
-2. Roads
-3. Drainage
-4. Electrical
-5. Traffic
-6. Sanitation
-7. Public Safety
+* Complaint ID
+* Employee ID
+* Department
+* Latitude
+* Longitude
+* Image
+* Timestamp
 
 ---
 
-## 8. Priority Levels & SLA
+## Module 2: GPS Verification
 
-| Priority | Description | Target Resolution |
-|----------|-------------|-------------------|
-| Critical | Life-affecting — no water, flooding, safety hazard | 2 hours |
-| High | Significant disruption — major pothole, power outage | 8 hours |
-| Medium | Moderate inconvenience — streetlight, partial supply | 24 hours |
-| Low | Minor issue — cosmetic, non-urgent requests | 72 hours |
+System checks:
 
----
+IF employee GPS matches complaint location range:
 
-## 9. Smart Allocation Logic
+Status = Location Verified
 
-Workers are scored using the following formula before assignment:
+Else:
 
-```
-score = (active_tasks × 0.5) + (avg_resolution_hours × 0.3)
-```
+Status = GPS Mismatch
 
-The worker with the **lowest score** in the matching department who is **available** receives the assignment. This ensures workload is balanced and faster workers are preferred.
+Rules:
+
+* Accept radius: 50–100 meters
+* If outside range → send to admin review
 
 ---
 
-## 10. Technical Constraints
+## Module 3: AI Image Verification
 
-| Constraint | Detail |
-|------------|--------|
-| Hackathon timeline | MVP must be buildable within 48–72 hours |
-| Lightweight ML | No GPU required; Scikit-learn + TF-IDF on CPU |
-| No real WhatsApp API | Simulated WhatsApp chat UI |
-| Custom dataset | Synthetic civic complaint dataset required |
-| Limited infrastructure | Free-tier hosting (Vercel, Render, MongoDB Atlas) |
+AI analyzes uploaded image.
 
----
+Examples:
 
-## 11. Tech Stack
+Complaint: Garbage issue
+Expected result:
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | React.js, Tailwind CSS, Chart.js, Axios |
-| Backend | FastAPI (Python) |
-| Authentication | JWT |
-| Database | MongoDB Atlas |
-| AI/ML | Scikit-learn, TF-IDF, Random Forest |
-| Deployment | Frontend → Vercel, Backend → Render |
+* Garbage removed
 
----
+Complaint: Pothole
+Expected result:
 
-## 12. Future Roadmap
+* Road repaired
 
-### Phase 2 (3–6 months)
-- Real WhatsApp Business API for complaint submission
-- SMS/email status notifications to citizens
-- Multilingual support (Hindi, Marathi, Tamil, etc.)
-- Complaint image/photo upload
+Complaint: Street light
+Expected result:
 
-### Phase 3 (6–12 months)
-- Multi-city SaaS architecture with tenant isolation
-- Live GIS map for worker tracking
-- Predictive analytics for complaint hotspots
-- Citizen mobile app (iOS & Android)
+* Light pole fixed
 
-### Phase 4 (12+ months)
-- Integration with national e-governance portals
-- BI dashboards for municipal leadership
-- Automated escalation workflows
-- Voice-based complaint submission (IVR)
+AI checks:
+
+* Object detection
+* Image classification
+* Complaint category matching
+* Image authenticity
+
+Decision:
+
+If image and complaint match:
+
+Status = Verified
+
+Else:
+
+Status = Incomplete
 
 ---
 
-## 13. Risks & Mitigations
+## Module 4: Citizen Confirmation
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Low AI accuracy on edge cases | Medium | High | Fallback to manual categorization by admin |
-| Worker data not updated in real time | Medium | Medium | Periodic sync + manual override option |
-| No internet access for citizens | Low | High | Future SMS-based fallback |
-| Dataset bias in training data | Medium | High | Diversify synthetic dataset across regions |
-| Single point of failure (Render free tier) | Low | High | Document manual escalation procedure |
+After AI verification:
+
+Citizen receives notification:
+
+"Municipal work for Complaint CV00125 is marked complete. Please confirm status."
+
+Citizen options:
+
+✅ Work completed
+
+❌ Work not completed
+
+Citizen may also:
+
+* Upload photo
+* Add comments
+
+Example:
+
+Comment:
+"Street light still not working"
 
 ---
 
-## 14. Approval & Sign-off
+## Module 5: Final Decision Logic
 
-| Role | Name | Date |
-|------|------|------|
-| Product Owner | — | — |
-| Tech Lead | — | — |
-| Design Lead | — | — |
-| Stakeholder | Municipal Corporation | — |
+Decision Flow:
+
+Case 1:
+GPS verified
++
+AI verified
++
+Citizen confirms complete
+
+Final status:
+COMPLETED
+
+Case 2:
+GPS verified
++
+AI verified
++
+Citizen rejects
+
+Final status:
+REOPEN COMPLAINT
+
+Case 3:
+GPS mismatch
+OR
+AI verification failed
+
+Final status:
+INCOMPLETE
+
+Send to:
+Admin review
 
 ---
 
-*Document prepared for CivicSevaAI v1.0 — Hackathon Edition*
+# 6. Workflow Diagram
+
+Citizen Complaint Created
+↓
+Assigned to Employee
+↓
+Employee completes work
+↓
+Employee uploads photo + GPS
+↓
+AI verifies image
+↓
+GPS validates location
+↓
+Citizen confirmation request
+↓
+Final decision
+↓
+Complete/Reopen/Admin Review
+
+---
+
+# 7. Database Structure
+
+Complaint Table
+
+Fields:
+
+* Complaint_ID
+* Citizen_ID
+* Department
+* Complaint_Type
+* Status
+* Location
+* Date
+
+Employee Verification Table
+
+Fields:
+
+* Verification_ID
+* Employee_ID
+* Complaint_ID
+* GPS_Latitude
+* GPS_Longitude
+* Image_Path
+* AI_Result
+* Timestamp
+
+Citizen Feedback Table
+
+Fields:
+
+* Feedback_ID
+* Complaint_ID
+* Citizen_Response
+* Comment
+* Image
+
+---
+
+# 8. Non-functional Requirements
+
+Performance:
+
+* Image verification within 5–10 seconds
+
+Security:
+
+* Secure image storage
+* Authentication for employees
+* GPS tampering detection
+
+Scalability:
+
+* Support multiple municipal departments
+
+Availability:
+
+* 24/7 service availability
+
+---
+
+# 9. Suggested Technology Stack
+
+Frontend:
+
+* React.js
+
+Backend:
+
+* Python FastAPI
+
+Database:
+
+* MySQL
+
+AI Models:
+
+* YOLO/Object Detection
+* Image Classification Model
+
+Maps:
+
+* Leaflet + OpenStreetMap
+
+Cloud Storage:
+
+* Firebase/AWS S3
+
+---
+
+# 10. Expected Outcomes
+
+* Increased trust in municipal systems
+* Reduced fake work completion reports
+* Faster complaint handling
+* Better employee accountability
+* Improved citizen satisfaction

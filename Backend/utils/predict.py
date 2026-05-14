@@ -28,20 +28,46 @@ def clean_input_text(text):
 def predict_category_and_priority(complaint_text):
     """
     Accepts complaint text and returns predicted category and priority.
+    Uses ML models if available, otherwise falls back to keyword matching.
     """
-    if not all([category_model, priority_model, vectorizer]):
-        return "Unknown", "Medium"
+    text = clean_input_text(complaint_text)
+    
+    # 1. Try ML Prediction if models are loaded
+    if all([category_model, priority_model, vectorizer]):
+        try:
+            features = vectorizer.transform([text])
+            category = category_model.predict(features)[0]
+            priority = priority_model.predict(features)[0]
+            return category, priority
+        except Exception as e:
+            print(f"ML Prediction failed, falling back to keywords: {e}")
 
-    # Preprocess
-    cleaned_text = clean_input_text(complaint_text)
+    # 2. Keyword-based Fallback (matching DOC/bot.md requirements)
+    category = "General"
+    if any(kw in text for kw in ["water", "supply", "tank", "tap", "pipe"]):
+        category = "Water"
+    elif any(kw in text for kw in ["electricity", "power", "light", "current"]):
+        category = "Electricity"
+    elif any(kw in text for kw in ["garbage", "waste", "trash", "dump", "clean"]):
+        category = "Waste Management"
+    elif any(kw in text for kw in ["road", "pothole", "pavement", "street"]):
+        category = "Roads"
+    elif any(kw in text for kw in ["drain", "sewer", "gutter", "overflow"]):
+        category = "Drainage"
+    elif any(kw in text for kw in ["traffic", "signal", "park", "vehicle"]):
+        category = "Traffic"
+    elif any(kw in text for kw in ["safety", "crime", "theft", "patrol"]):
+        category = "Public Safety"
     
-    # Transform text to TF-IDF features
-    features = vectorizer.transform([cleaned_text])
+    priority = "Medium"
+    high_keywords = ["urgent", "emergency", "not available", "broken", "danger", "dead", "high", "morning", "now"]
+    low_keywords = ["slow", "low", "sometimes", "maybe", "past"]
     
-    # Predict
-    category = category_model.predict(features)[0]
-    priority = priority_model.predict(features)[0]
-    
+    if any(kw in text for kw in high_keywords):
+        priority = "High"
+    elif any(kw in text for kw in low_keywords):
+        priority = "Low"
+        
     return category, priority
 
 if __name__ == "__main__":

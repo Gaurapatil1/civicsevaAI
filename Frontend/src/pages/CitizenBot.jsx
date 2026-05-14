@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { submitComplaint, login, register } from '../services/api';
 import './CitizenBot.css';
-import { FaPaperPlane, FaUserCircle, FaRobot, FaSignOutAlt, FaUserPlus, FaSignInAlt } from 'react-icons/fa';
+import { FaPaperPlane, FaUserCircle, FaRobot, FaSignOutAlt, FaUserPlus, FaSignInAlt, FaSearch } from 'react-icons/fa';
 
 const CitizenBot = () => {
   const navigate = useNavigate();
@@ -226,6 +226,27 @@ const CitizenBot = () => {
 
   return (
     <div className="bot-page">
+      {/* Official Government Navbar */}
+      <nav className="gov-navbar">
+        <div className="nav-container">
+          <div className="nav-links">
+            <div className="nav-item active">HOME</div>
+            <div className="nav-item">ABOUT US</div>
+            <div className="nav-item" onClick={() => navigate('/admin')}>DASHBOARD</div>
+            <div className="nav-item">CONTACT</div>
+            <div className="nav-item">HELP</div>
+          </div>
+          <div className="nav-search-actions">
+             <div className="nav-search">
+                <FaSearch /> <input type="text" placeholder="Search Services..." />
+             </div>
+             <button onClick={() => navigate('/login')} className="admin-login-link-btn">
+                ADMIN LOGIN
+             </button>
+          </div>
+        </div>
+      </nav>
+
       <header className="bot-header">
         <div className="header-content">
           <div className="gov-seal">
@@ -238,7 +259,6 @@ const CitizenBot = () => {
           <img src="/pngwing.com.png" alt="Swachh Bharat" className="swachh-logo" />
         </div>
         <div className="header-actions">
-           {user && <a href="/admin" className="admin-link">Command Center</a>}
            {user && <button onClick={handleLogout} className="logout-btn-header"><FaSignOutAlt /> Logout</button>}
         </div>
       </header>

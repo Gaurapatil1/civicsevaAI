@@ -1,0 +1,118 @@
+﻿python : INFO:     Started 
+server process [20436]
+At line:1 char:1
++ python -m uvicorn main:app 
+--port 8000 > server_log.txt 
+2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo          : 
+    NotSpecified: (INFO:      
+   Started server process [   
+ 20436]:String) [], Remote    
+Exception
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+INFO:     Waiting for 
+application startup.
+INFO:database:\U0001f6e0\ufe0f
+  Running in MOCK MODE 
+(Simulated DB)
+ERROR:database:Failed to seed 
+mock data: SSL handshake 
+failed: ac-usnwwuf-shard-00-00
+.pjrn98q.mongodb.net:27017: 
+[SSL: 
+TLSV1_ALERT_INTERNAL_ERROR] 
+tlsv1 alert internal error 
+(_ssl.c:1006) (configured 
+timeouts: socketTimeoutMS: 
+20000.0ms, connectTimeoutMS: 
+20000.0ms),SSL handshake 
+failed: ac-usnwwuf-shard-00-01
+.pjrn98q.mongodb.net:27017: 
+[SSL: 
+TLSV1_ALERT_INTERNAL_ERROR] 
+tlsv1 alert internal error 
+(_ssl.c:1006) (configured 
+timeouts: socketTimeoutMS: 
+20000.0ms, connectTimeoutMS: 
+20000.0ms),SSL handshake 
+failed: ac-usnwwuf-shard-00-02
+.pjrn98q.mongodb.net:27017: 
+[SSL: 
+TLSV1_ALERT_INTERNAL_ERROR] 
+tlsv1 alert internal error 
+(_ssl.c:1006) (configured 
+timeouts: socketTimeoutMS: 
+20000.0ms, connectTimeoutMS: 
+20000.0ms), Timeout: 20.0s, 
+Topology Description: 
+<TopologyDescription id: 
+6a05db5b6b07845b9e412e37, 
+topology_type: 
+ReplicaSetNoPrimary, servers: 
+[<ServerDescription ('ac-usnww
+uf-shard-00-00.pjrn98q.mongodb
+.net', 27017) server_type: 
+Unknown, rtt: None, 
+error=AutoReconnect('SSL 
+handshake failed: ac-usnwwuf-s
+hard-00-00.pjrn98q.mongodb.net
+:27017: [SSL: 
+TLSV1_ALERT_INTERNAL_ERROR] 
+tlsv1 alert internal error 
+(_ssl.c:1006) (configured 
+timeouts: socketTimeoutMS: 
+20000.0ms, connectTimeoutMS: 
+20000.0ms)')>, 
+<ServerDescription ('ac-usnwwu
+f-shard-00-01.pjrn98q.mongodb.
+net', 27017) server_type: 
+Unknown, rtt: None, 
+error=AutoReconnect('SSL 
+handshake failed: ac-usnwwuf-s
+hard-00-01.pjrn98q.mongodb.net
+:27017: [SSL: 
+TLSV1_ALERT_INTERNAL_ERROR] 
+tlsv1 alert internal error 
+(_ssl.c:1006) (configured 
+timeouts: socketTimeoutMS: 
+20000.0ms, connectTimeoutMS: 
+20000.0ms)')>, 
+<ServerDescription ('ac-usnwwu
+f-shard-00-02.pjrn98q.mongodb.
+net', 27017) server_type: 
+Unknown, rtt: None, 
+error=AutoReconnect('SSL 
+handshake failed: ac-usnwwuf-s
+hard-00-02.pjrn98q.mongodb.net
+:27017: [SSL: 
+TLSV1_ALERT_INTERNAL_ERROR] 
+tlsv1 alert internal error 
+(_ssl.c:1006) (configured 
+timeouts: socketTimeoutMS: 
+20000.0ms, connectTimeoutMS: 
+20000.0ms)')>]>
+INFO:database:\u2705 Mock 
+Database ready and seeded.
+INFO:     Application startup 
+complete.
+ERROR:    [Errno 10048] error 
+while attempting to bind on 
+address ('127.0.0.1', 8000): 
+only one usage of each socket 
+address (protocol/network 
+address/port) is normally 
+permitted
+INFO:     Waiting for 
+application shutdown.
+INFO:database:\U0001f50c 
+Closing MongoDB connection...
+INFO:database:\u2705 MongoDB 
+connection closed.
+INFO:     Application 
+shutdown complete.
+AI Models loaded successfully.
