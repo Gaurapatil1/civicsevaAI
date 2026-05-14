@@ -1,96 +1,40 @@
+/* 
+  CIVIC SEVA AI - MUNICIPAL COMPLAINT ASSISTANT
+  Redesigned as per DOC/design.md
+*/
+
 .bot-page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f0f2f5; /* WhatsApp-like light gray */
+  background-color: #f0f2f5; /* Classic chat background */
+  font-family: 'Inter', sans-serif;
 }
 
-/* Official Gov Navbar Styles */
+/* NAVBAR: Simple & Official */
 .gov-navbar {
-  background-color: #1a4f9c;
-  color: white;
-  padding: 0.6rem 0;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  background: white;
+  padding: 0.5rem 2rem;
+  border-bottom: 1px solid var(--gov-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   z-index: 100;
 }
 
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 1.5rem;
-}
+.nav-container { display: flex; gap: 1.5rem; }
+.nav-item { font-size: 0.8rem; font-weight: 600; color: var(--gov-text-muted); cursor: pointer; }
+.nav-item.active { color: var(--gov-navy); border-bottom: 2px solid var(--gov-navy); }
 
-.nav-links {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.nav-item {
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  color: #e0e0e0;
-  transition: all 0.2s;
-  text-transform: uppercase;
-}
-
-.nav-item:hover, .nav-item.active {
-  color: white;
-  border-bottom: 2px solid #ff4d4d;
-}
-
-.nav-search-actions {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.nav-search {
-  display: flex;
-  align-items: center;
-  background: rgba(255,255,255,0.1);
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-}
-
-.nav-search input {
-  background: transparent;
-  border: none;
-  color: white;
-  margin-left: 5px;
-  outline: none;
-  width: 120px;
-}
-
-.admin-login-link-btn {
-  background: #e11d48;
-  color: white;
-  border: none;
-  padding: 0.4rem 1.2rem;
-  border-radius: 4px;
-  font-weight: 800;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.admin-login-link-btn:hover {
-  background: #be123c;
-  transform: translateY(-1px);
-}
-
+/* HEADER: Trustworthy Branding */
 .bot-header {
-  background-color: var(--primary);
+  background: var(--gov-navy);
   color: white;
-  padding: 0.75rem 2rem;
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   z-index: 10;
 }
 
@@ -100,62 +44,30 @@
   gap: 1rem;
 }
 
-.gov-seal {
-  font-size: 2rem;
-  background: white;
-  border-radius: 50%;
+.gov-seal-img {
   width: 45px;
   height: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.header-text h1 {
-  color: white;
-  margin: 0;
-  font-size: 1.25rem;
-}
-
-.header-text p {
-  margin: 0;
-  font-size: 0.8rem;
-  opacity: 0.8;
-}
-
-.gov-seal-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  background: white;
+  border-radius: 50%;
   padding: 5px;
 }
 
-.swachh-logo {
-  height: 40px;
-  margin-left: auto;
-  filter: brightness(0) invert(1); /* Make it white to match header */
+.header-text h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: white;
 }
 
-.bot-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
+.header-text p {
+  font-size: 0.75rem;
+  margin: 0;
+  opacity: 0.8;
 }
 
-.admin-link {
-  font-size: 0.9rem;
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  transition: all 0.2s;
-}
+.swachh-logo { height: 40px; filter: brightness(0) invert(1); }
 
-.admin-link:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
+/* CHAT CONTAINER: Enterprise Grade */
 .chat-container {
   flex: 1;
   display: flex;
@@ -166,6 +78,7 @@
   background: white;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
 }
 
 .chat-messages {
@@ -174,10 +87,10 @@
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); /* WhatsApp theme background */
+  gap: 1.25rem;
+  background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
   background-blend-mode: overlay;
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(255, 255, 255, 0.96);
 }
 
 .message-wrapper {
@@ -196,18 +109,14 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--border);
+  background: #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary);
   flex-shrink: 0;
 }
 
-.user .avatar {
-  background: var(--secondary);
-  color: white;
-}
+.bot .avatar { background: var(--gov-navy); color: white; }
 
 .message-content {
   display: flex;
@@ -217,103 +126,62 @@
 .message-bubble {
   padding: 0.75rem 1rem;
   border-radius: 12px;
-  background: white;
-  box-shadow: var(--shadow-sm);
   font-size: 0.95rem;
-  position: relative;
+  line-height: 1.5;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .bot .message-bubble {
   background: white;
+  color: var(--gov-text-main);
   border-top-left-radius: 2px;
 }
 
 .user .message-bubble {
-  background: #dcf8c6; /* WhatsApp user green */
+  background: #dcf8c6;
+  color: #1a1a1a;
   border-top-right-radius: 2px;
 }
 
 .message-time {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.7rem;
+  color: var(--gov-text-muted);
   margin-top: 0.25rem;
   align-self: flex-end;
 }
 
+/* INPUT AREA: Practical */
 .chat-input {
   display: flex;
-  gap: 1rem;
-  padding: 1rem 2rem;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
   background: #f0f2f5;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid #e2e8f0;
 }
 
 .chat-input input {
   flex: 1;
   padding: 0.75rem 1.25rem;
-  border: 1px solid transparent;
-  border-radius: 25px;
+  border-radius: 24px;
+  border: 1px solid #e2e8f0;
   background: white;
   outline: none;
   font-size: 0.95rem;
-  transition: border-color 0.2s;
-}
-
-.chat-input input:focus {
-  border-color: var(--primary);
 }
 
 .chat-input button {
   width: 45px;
   height: 45px;
   border-radius: 50%;
-  background: var(--primary);
+  background: var(--gov-navy);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.2rem;
-  transition: all 0.2s;
 }
 
-.chat-input button:hover:not(:disabled) {
-  transform: scale(1.05);
-  background: var(--primary-light);
-}
-
-.chat-input button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.loading {
-  font-style: italic;
-  color: var(--text-muted);
-}
-
-.auth-options {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
-.auth-btn {
-  background: var(--primary);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s;
-}
-
-.auth-btn:hover {
-  background: var(--primary-light);
-  transform: translateY(-1px);
-}
-
+/* INTERACTIVE HELPERS */
 .category-options {
   display: flex;
   flex-wrap: wrap;
@@ -323,34 +191,31 @@
 
 .cat-btn {
   background: white;
-  color: var(--primary);
-  border: 1px solid var(--primary);
-  padding: 0.6rem 1.2rem;
+  color: var(--gov-navy);
+  border: 1px solid var(--gov-navy);
+  padding: 0.5rem 1rem;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 500;
   transition: all 0.2s;
-  box-shadow: var(--shadow-sm);
 }
 
 .cat-btn:hover {
-  background: var(--primary);
+  background: var(--gov-navy);
   color: white;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
 }
 
-.logout-btn-header {
-  font-size: 0.9rem;
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  margin-left: 10px;
-  transition: all 0.2s;
+.auth-options {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
-.logout-btn-header:hover {
-  background: rgba(255, 255, 255, 0.2);
+.auth-btn {
+  background: var(--gov-navy);
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
 }

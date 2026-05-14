@@ -41,16 +41,16 @@ async def find_best_worker(category: str):
         # Extract metrics
         active_tasks = float(worker.get("active_tasks", 0))
         avg_resolution_hours = float(worker.get("avg_resolution_hours", 0.0))
+        avg_rating = float(worker.get("avg_rating", 4.0)) # Default to 4.0 for new workers
         
-        # FORMULA: score = (active_tasks * 0.5) + (avg_resolution_hours * 0.3)
-        # Detailed Comments:
+        # REVISED FORMULA: score = (active_tasks * 0.5) + (avg_resolution_hours * 0.3) + (5 - avg_rating) * 0.2
         # - active_tasks is weighted 0.5 to prioritize current LOAD.
         # - avg_resolution_hours is weighted 0.3 to factor in EFFICIENCY.
-        # Lower total score indicates a better candidate for a new task.
+        # - (5 - avg_rating) adds a penalty for poor performance to prioritize SATISFACTION.
         
-        workload_score = (active_tasks * 0.5) + (avg_resolution_hours * 0.3)
+        workload_score = (active_tasks * 0.5) + (avg_resolution_hours * 0.3) + (5 - avg_rating) * 0.2
         
-        print(f"Worker: {worker['name']}, Score: {workload_score}")
+        print(f"Worker: {worker['name']}, Score: {workload_score:.2f} (Rating: {avg_rating})")
 
         if workload_score < min_score:
             min_score = workload_score

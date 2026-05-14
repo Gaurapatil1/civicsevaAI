@@ -55,6 +55,9 @@ const Login = () => {
           </div>
           
           <div className="nav-actions">
+            <button onClick={() => navigate('/')} className="nav-portal-btn">
+              CITIZEN PORTAL
+            </button>
             {localStorage.getItem('user') && (
               <button onClick={() => { localStorage.clear(); window.location.reload(); }} className="nav-logout-btn">
                 <FaSignOutAlt /> LOGOUT

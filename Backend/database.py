@@ -123,11 +123,18 @@ async def connect_to_mongo():
             raise e
 
 async def seed_mock_data():
-    """
-    Seeds initial data for demo based on PRD requirements.
-    """
+    """Seeds the database with data from CSV files and standard demo users."""
     try:
-        # 1. Admin User
+        import pandas as pd
+        import os
+        from datetime import datetime
+
+        # Paths
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        complaints_path = os.path.join(base_path, "data", "complaints_dataset.csv")
+        employees_path = os.path.join(base_path, "data", "municipality_employees.csv")
+
+        # 1. Seed Admin User
         admin_email = "admin@gov.in"
         existing_admin = await db.db.users.find_one({"email": admin_email})
         if not existing_admin:
@@ -139,71 +146,72 @@ async def seed_mock_data():
                 "city": "Mumbai",
                 "created_at": datetime.now()
             })
-        
-        # 1.1 Worker User
-        worker_email = "worker@gov.in"
-        existing_worker = await db.db.users.find_one({"email": worker_email})
-        if not existing_worker:
-            await db.db.users.insert_one({
-                "name": "Amit Worker",
-                "email": worker_email,
-                "password": "worker123",
-                "role": "worker",
-                "city": "Mumbai",
-                "created_at": datetime.now()
-            })
 
-        # 2. Field Workers
-        if not await db.db.workers.find_one({"department": "Water"}):
-            workers_list = [
-                {"worker_id": "W001", "name": "Amit Patil", "department": "Water", "active_tasks": 1, "availability": True, "avg_resolution_hours": 5.0},
-                {"worker_id": "W002", "name": "Rahul Deshmukh", "department": "Roads", "active_tasks": 3, "availability": False, "avg_resolution_hours": 12.0},
-                {"worker_id": "W003", "name": "Priyanka Shinde", "department": "Waste Management", "active_tasks": 0, "availability": True, "avg_resolution_hours": 4.0},
-            ]
-            for w in workers_list:
-                await db.db.workers.insert_one(w)
+        # 2. Seed Workers from municipality_employees.csv
+        if os.path.exists(employees_path):
+            df_emp = pd.read_csv(employees_path)
+            for _, row in df_emp.iterrows():
+                worker_id = str(row["Employee ID"])
+                existing = await db.db.workers.find_one({"worker_id": worker_id})
+                if not existing:
+                    import random
+                    await db.db.workers.insert_one({
+                        "worker_id": worker_id,
+                        "name": row["Name"],
+                        "department": row["Department"],
+                        "designation": row["Designation"],
+                        "contact": str(row["Contact"]),
+                        "active_tasks": 0,
+                        "avg_resolution_hours": round(random.uniform(4.0, 24.0), 1),
+                        "avg_rating": round(random.uniform(3.5, 5.0), 1),
+                        "availability": True,
+                        "city": "Mumbai"
+                    })
 
-        # 3. Sample Complaints
-        if not await db.db.complaints.find_one({}):
-            complaints_list = [
-                {
-                    "citizen_name": "Rajesh Kumar",
-                    "city": "Mumbai",
-                    "category": "Water",
-                    "priority": "Critical",
-                    "status": "Resolved",
-                    "message": "Major water pipe burst on Main Street.",
-                    "created_at": datetime.now()
-                }
-            ]
-            for c in complaints_list:
-                await db.db.complaints.insert_one(c)
+        # 3. Seed Complaints from complaints_dataset.csv
+        if os.path.exists(complaints_path):
+            df_comp = pd.read_csv(complaints_path)
+            for idx, row in df_comp.head(50).iterrows():
+                comp_id = f"CMP{idx+1000}"
+                existing = await db.db.complaints.find_one({"_id": comp_id})
+                if not existing:
+                    worker = await db.db.workers.find_one({"department": row["category"]})
+                    worker_data = None
+                    if worker:
+                        worker_data = {
+                            "worker_id": worker["worker_id"],
+                            "name": worker["name"],
+                            "department": worker["department"],
+                            "designation": worker["designation"]
+                        }
 
-        # 4. Work Verifications (PRD Module 1 & 3)
-        if not await db.db.verifications.find_one({}):
-            await db.db.verifications.insert_one({
-                "verification_id": "V_001",
-                "complaint_id": "C_001",
-                "worker_id": "W001",
-                "gps_status": "Location Verified",
-                "ai_result": "Verified",
-                "image_path": "https://images.unsplash.com/photo-1541888946425-d81bb19480c5",
-                "timestamp": datetime.now()
-            })
+                    await db.db.complaints.insert_one({
+                        "_id": comp_id,
+                        "citizen_name": "Citizen User",
+                        "city": "Mumbai",
+                        "message": row["complaint_text"],
+                        "category": row["category"],
+                        "priority": row["priority"],
+                        "assigned_worker": worker_data,
+                        "status": "Resolved" if idx % 3 == 0 else "Pending",
+                        "created_at": datetime.now()
+                    })
 
-        # 5. Citizen Feedback (PRD Module 4)
-        if not await db.db.feedbacks.find_one({}):
-            await db.db.feedbacks.insert_one({
-                "feedback_id": "F_001",
-                "complaint_id": "C_001",
-                "citizen_response": "Work completed",
-                "comment": "Thank you, street is much better now.",
-                "timestamp": datetime.now()
-            })
-            
-        logger.info("🌱 Database Seeded Successfully.")
+        # 4. Seed Verifications (AI/GPS)
+        complaints = await db.db.complaints.find().to_list(10)
+        for c in complaints:
+            existing = await db.db.verifications.find_one({"complaint_id": str(c["_id"])})
+            if not existing:
+                await db.db.verifications.insert_one({
+                    "complaint_id": str(c["_id"]),
+                    "gps_status": "Location Verified",
+                    "ai_result": "Verified" if c["status"] == "Resolved" else "In Progress",
+                    "verified_at": datetime.now()
+                })
+
+        logger.info("✅ Mock Database populated with Dataset files.")
     except Exception as e:
-        logger.error(f"❌ Seeding Failed: {e}")
+        logger.error(f"Failed to seed dataset mock data: {e}")
 
 async def close_mongo_connection():
     if db.client:

@@ -91,3 +91,65 @@ async def submit_complaint(complaint: ComplaintCreate):
         "status": complaint_record["status"],
         "created_at": complaint_record["created_at"]
     }
+
+# NEW WORKFLOW ENDPOINTS
+
+from models.complaint import ResolutionUpdate, CitizenFeedback
+
+@router.put("/{complaint_id}/resolve")
+async def resolve_complaint(complaint_id: str, update: ResolutionUpdate):
+    """
+    Step 2 & 3: Worker marks task as completed and uploads proof.
+    """
+    if db.db is None:
+        raise HTTPException(status_code=500, detail="Database not connected.")
+
+    complaint = await db.db.complaints.find_one({"_id": complaint_id})
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Complaint not found")
+
+    # Update Complaint Status
+    update_data = {
+        "status": "Resolved",
+        "completion_note": update.completion_note,
+        "completion_image": update.completion_image,
+        "resolved_at": datetime.utcnow()
+    }
+
+    await db.db.complaints.update_one({"_id": complaint_id}, {"$set": update_data})
+
+    # Decrement Worker active tasks
+    if complaint.get("assigned_worker"):
+        await db.db.workers.update_one(
+            {"worker_id": complaint["assigned_worker"]["worker_id"]},
+            {"$inc": {"active_tasks": -1}}
+        )
+
+    return {"status": "success", "message": "Complaint resolved successfully"}
+
+@router.post("/{complaint_id}/feedback")
+async def submit_feedback(complaint_id: str, feedback: CitizenFeedback):
+    """
+    Step 5 & 6: Citizen provides rating and feedback.
+    """
+    if db.db is None:
+        raise HTTPException(status_code=500, detail="Database not connected.")
+
+    complaint = await db.db.complaints.find_one({"_id": complaint_id})
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Complaint not found")
+
+    # Store rating and feedback
+    await db.db.complaints.update_one(
+        {"_id": complaint_id},
+        {"$set": {"rating": feedback.rating, "feedback": feedback.feedback}}
+    )
+
+    # Update Worker rating (simple average logic could be added here in a real system)
+    if complaint.get("assigned_worker"):
+        worker_id = complaint["assigned_worker"]["worker_id"]
+        # In a real system, we'd recalculate the worker's average rating here.
+        # For the demo, we just store it in the complaint record which the dashboard will aggregate.
+        pass
+
+    return {"status": "success", "message": "Feedback received. Jai Hind!"}

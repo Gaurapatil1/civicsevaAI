@@ -31,3 +31,17 @@ class ComplaintResponse(BaseModel):
     assigned_worker: Optional[WorkerInfo] = None
     status: str
     created_at: datetime
+    completion_note: Optional[str] = None
+    completion_image: Optional[str] = None
+    rating: Optional[int] = None
+    feedback: Optional[str] = None
+
+class ResolutionUpdate(BaseModel):
+    """Schema for marking a complaint as resolved."""
+    completion_note: str
+    completion_image: Optional[str] = "repair_site.jpg" # Default mock image
+
+class CitizenFeedback(BaseModel):
+    """Schema for citizen rating and feedback."""
+    rating: int = Field(..., ge=1, le=5)
+    feedback: Optional[str] = None
