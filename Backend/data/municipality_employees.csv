@@ -1,0 +1,101 @@
+Employee ID,Name,Age,Blood Group,Department,Designation,Contact,Email,Validation From,Validation To
+EMP001,Kiran Patil,37,AB+,Water Supply,Junior Engineer,9840354452,kiran.patil@municipal.gov,10-02-2026,10-02-2031
+EMP002,Meena Sharma,43,A-,Water Supply,Junior Engineer,9885762565,meena.sharma@municipal.gov,04-08-2026,04-08-2031
+EMP003,Riya Verma,24,AB-,Water Supply,Junior Engineer,9835298150,riya.verma@municipal.gov,02-04-2026,02-04-2031
+EMP004,Amit Singh,42,B+,Water Supply,Junior Engineer,9840313504,amit.singh@municipal.gov,07-01-2026,07-01-2031
+EMP005,Amit Pawar,42,A+,Water Supply,Junior Engineer,9871348588,amit.pawar@municipal.gov,18-10-2026,18-10-2031
+EMP006,Rohit Joshi,33,O+,Water Supply,Junior Engineer,9818282464,rohit.joshi@municipal.gov,05-10-2026,05-10-2031
+EMP007,Pooja Singh,43,AB-,Water Supply,Junior Engineer,9837447455,pooja.singh@municipal.gov,16-03-2026,16-03-2031
+EMP008,Pooja Kulkarni,31,O-,Water Supply,Junior Engineer,9810345924,pooja.kulkarni@municipal.gov,04-06-2026,04-06-2031
+EMP009,Akash Pawar,46,B+,Water Supply,Junior Engineer,9886174002,akash.pawar@municipal.gov,12-11-2026,12-11-2031
+EMP010,Raj Singh,42,AB+,Water Supply,Junior Engineer,9870849072,raj.singh@municipal.gov,14-11-2026,14-11-2031
+EMP011,Riya Sharma,42,B-,Sanitation,Health Inspector,9855386338,riya.sharma@municipal.gov,08-02-2026,08-02-2031
+EMP012,Vikas Jadhav,41,O+,Sanitation,Health Inspector,9887849990,vikas.jadhav@municipal.gov,25-11-2026,25-11-2031
+EMP013,Raj Verma,24,O+,Sanitation,Health Inspector,9824727915,raj.verma@municipal.gov,08-01-2026,08-01-2031
+EMP014,Anjali Joshi,29,A+,Sanitation,Health Inspector,9892029410,anjali.joshi@municipal.gov,18-05-2026,18-05-2031
+EMP015,Riya Kulkarni,37,A+,Sanitation,Health Inspector,9821924189,riya.kulkarni@municipal.gov,24-02-2026,24-02-2031
+EMP016,Sagar Singh,33,A-,Sanitation,Health Inspector,9839423132,sagar.singh@municipal.gov,28-11-2026,28-11-2031
+EMP017,Vikas Kulkarni,31,AB+,Sanitation,Health Inspector,9859867292,vikas.kulkarni@municipal.gov,14-04-2026,14-04-2031
+EMP018,Vikas Patil,28,O+,Sanitation,Health Inspector,9875807756,vikas.patil@municipal.gov,18-05-2026,18-05-2031
+EMP019,Arjun Pawar,32,B+,Sanitation,Health Inspector,9857636839,arjun.pawar@municipal.gov,27-03-2026,27-03-2031
+EMP020,Riya Patil,36,B-,Sanitation,Health Inspector,9830336095,riya.patil@municipal.gov,12-09-2026,12-09-2031
+EMP021,Kiran Patil,50,AB+,Roads & Infrastructure,Site Supervisor,9830743566,kiran.patil@municipal.gov,12-03-2026,12-03-2031
+EMP022,Sneha More,49,O-,Roads & Infrastructure,Site Supervisor,9857928632,sneha.more@municipal.gov,11-11-2026,11-11-2031
+EMP023,Sneha Sharma,36,AB+,Roads & Infrastructure,Site Supervisor,9892114251,sneha.sharma@municipal.gov,06-06-2026,06-06-2031
+EMP024,Kiran Jadhav,28,B-,Roads & Infrastructure,Site Supervisor,9821025795,kiran.jadhav@municipal.gov,03-01-2026,03-01-2031
+EMP025,Pooja Jadhav,25,O-,Roads & Infrastructure,Site Supervisor,9872508355,pooja.jadhav@municipal.gov,10-07-2026,10-07-2031
+EMP026,Kiran Pawar,38,AB+,Roads & Infrastructure,Site Supervisor,9854466276,kiran.pawar@municipal.gov,09-06-2026,09-06-2031
+EMP027,Raj Kulkarni,49,AB-,Roads & Infrastructure,Site Supervisor,9841196828,raj.kulkarni@municipal.gov,25-06-2026,25-06-2031
+EMP028,Arjun Joshi,32,A-,Roads & Infrastructure,Site Supervisor,9866795649,arjun.joshi@municipal.gov,01-09-2026,01-09-2031
+EMP029,Meena More,43,O+,Roads & Infrastructure,Site Supervisor,9821744994,meena.more@municipal.gov,01-10-2026,01-10-2031
+EMP030,Neha Verma,38,O+,Roads & Infrastructure,Site Supervisor,9872844412,neha.verma@municipal.gov,13-12-2026,13-12-2031
+EMP031,Priya Sharma,40,O-,Public Health,Medical Officer,9825536452,priya.sharma@municipal.gov,21-10-2026,21-10-2031
+EMP032,Riya Singh,30,B-,Public Health,Medical Officer,9851248883,riya.singh@municipal.gov,03-08-2026,03-08-2031
+EMP033,Arjun Jadhav,47,O+,Public Health,Medical Officer,9861655975,arjun.jadhav@municipal.gov,19-06-2026,19-06-2031
+EMP034,Vikas Deshmukh,50,A-,Public Health,Medical Officer,9832960799,vikas.deshmukh@municipal.gov,09-12-2026,09-12-2031
+EMP035,Priya Verma,48,A+,Public Health,Medical Officer,9858599366,priya.verma@municipal.gov,16-12-2026,16-12-2031
+EMP036,Sneha Deshmukh,30,O+,Public Health,Medical Officer,9873520594,sneha.deshmukh@municipal.gov,23-09-2026,23-09-2031
+EMP037,Kiran Singh,32,A-,Public Health,Medical Officer,9871142313,kiran.singh@municipal.gov,19-05-2026,19-05-2031
+EMP038,Rohit Kulkarni,48,AB+,Public Health,Medical Officer,9842252387,rohit.kulkarni@municipal.gov,22-08-2026,22-08-2031
+EMP039,Riya Sharma,44,AB-,Public Health,Medical Officer,9830454696,riya.sharma@municipal.gov,15-05-2026,15-05-2031
+EMP040,Raj Singh,27,O+,Public Health,Medical Officer,9858136482,raj.singh@municipal.gov,28-06-2026,28-06-2031
+EMP041,Raj More,26,B-,Property Tax,Tax Officer,9851746663,raj.more@municipal.gov,04-05-2026,04-05-2031
+EMP042,Raj Sharma,32,B-,Property Tax,Tax Officer,9888894032,raj.sharma@municipal.gov,22-06-2026,22-06-2031
+EMP043,Kiran Pawar,27,O+,Property Tax,Tax Officer,9838897102,kiran.pawar@municipal.gov,15-01-2026,15-01-2031
+EMP044,Pooja Joshi,27,O-,Property Tax,Tax Officer,9834566078,pooja.joshi@municipal.gov,21-12-2026,21-12-2031
+EMP045,Pooja Joshi,42,A+,Property Tax,Tax Officer,9881175106,pooja.joshi@municipal.gov,18-06-2026,18-06-2031
+EMP046,Arjun More,35,AB-,Property Tax,Tax Officer,9858249593,arjun.more@municipal.gov,21-03-2026,21-03-2031
+EMP047,Neha Patil,33,A-,Property Tax,Tax Officer,9890960439,neha.patil@municipal.gov,14-06-2026,14-06-2031
+EMP048,Anjali Kulkarni,40,A-,Property Tax,Tax Officer,9864956931,anjali.kulkarni@municipal.gov,07-12-2026,07-12-2031
+EMP049,Meena Sharma,38,O-,Property Tax,Tax Officer,9813956110,meena.sharma@municipal.gov,23-12-2026,23-12-2031
+EMP050,Kiran Jadhav,43,AB+,Property Tax,Tax Officer,9859855375,kiran.jadhav@municipal.gov,20-10-2026,20-10-2031
+EMP051,Kiran Deshmukh,38,AB-,Complaint Management,Grievance Officer,9872671775,kiran.deshmukh@municipal.gov,19-07-2026,19-07-2031
+EMP052,Kiran Joshi,47,AB-,Complaint Management,Grievance Officer,9832195143,kiran.joshi@municipal.gov,18-03-2026,18-03-2031
+EMP053,Sagar More,37,A-,Complaint Management,Grievance Officer,9887050443,sagar.more@municipal.gov,16-04-2026,16-04-2031
+EMP054,Amit Patil,24,B-,Complaint Management,Grievance Officer,9879613732,amit.patil@municipal.gov,19-09-2026,19-09-2031
+EMP055,Sneha Deshmukh,37,AB-,Complaint Management,Grievance Officer,9853575788,sneha.deshmukh@municipal.gov,20-06-2026,20-06-2031
+EMP056,Meena Jadhav,28,AB-,Complaint Management,Grievance Officer,9820208820,meena.jadhav@municipal.gov,13-03-2026,13-03-2031
+EMP057,Kiran Joshi,31,B+,Complaint Management,Grievance Officer,9829244260,kiran.joshi@municipal.gov,24-09-2026,24-09-2031
+EMP058,Amit Sharma,39,AB+,Complaint Management,Grievance Officer,9870160599,amit.sharma@municipal.gov,26-04-2026,26-04-2031
+EMP059,Vikas Jadhav,31,O-,Complaint Management,Grievance Officer,9851918798,vikas.jadhav@municipal.gov,19-02-2026,19-02-2031
+EMP060,Rohit Deshmukh,37,A-,Complaint Management,Grievance Officer,9895329152,rohit.deshmukh@municipal.gov,24-01-2026,24-01-2031
+EMP061,Riya Sharma,24,AB-,Electrical Department,Electrical Engineer,9855697087,riya.sharma@municipal.gov,28-11-2026,28-11-2031
+EMP062,Anjali Verma,46,A-,Electrical Department,Electrical Engineer,9851886746,anjali.verma@municipal.gov,25-07-2026,25-07-2031
+EMP063,Arjun Verma,33,B+,Electrical Department,Electrical Engineer,9894676840,arjun.verma@municipal.gov,07-01-2026,07-01-2031
+EMP064,Raj Jadhav,36,B+,Electrical Department,Electrical Engineer,9897199966,raj.jadhav@municipal.gov,24-06-2026,24-06-2031
+EMP065,Riya Kulkarni,24,O+,Electrical Department,Electrical Engineer,9875236969,riya.kulkarni@municipal.gov,19-10-2026,19-10-2031
+EMP066,Raj Deshmukh,33,B+,Electrical Department,Electrical Engineer,9876155948,raj.deshmukh@municipal.gov,04-01-2026,04-01-2031
+EMP067,Rohit Pawar,49,A+,Electrical Department,Electrical Engineer,9876504418,rohit.pawar@municipal.gov,06-07-2026,06-07-2031
+EMP068,Rohit Jadhav,50,O-,Electrical Department,Electrical Engineer,9826303176,rohit.jadhav@municipal.gov,23-05-2026,23-05-2031
+EMP069,Rohit Verma,50,AB+,Electrical Department,Electrical Engineer,9884064723,rohit.verma@municipal.gov,10-11-2026,10-11-2031
+EMP070,Kiran Patil,37,AB-,Electrical Department,Electrical Engineer,9872830741,kiran.patil@municipal.gov,27-02-2026,27-02-2031
+EMP071,Vikas Deshmukh,39,B+,Administration,Clerk,9854998596,vikas.deshmukh@municipal.gov,22-04-2026,22-04-2031
+EMP072,Raj Pawar,38,O-,Administration,Clerk,9899350886,raj.pawar@municipal.gov,12-12-2026,12-12-2031
+EMP073,Raj Sharma,43,O+,Administration,Clerk,9864745602,raj.sharma@municipal.gov,04-04-2026,04-04-2031
+EMP074,Kiran Pawar,27,O+,Administration,Clerk,9829699952,kiran.pawar@municipal.gov,25-01-2026,25-01-2031
+EMP075,Sagar Kulkarni,32,A+,Administration,Clerk,9891127230,sagar.kulkarni@municipal.gov,18-05-2026,18-05-2031
+EMP076,Sneha Verma,42,O-,Administration,Clerk,9880499622,sneha.verma@municipal.gov,27-08-2026,27-08-2031
+EMP077,Kiran Pawar,47,O+,Administration,Clerk,9863075956,kiran.pawar@municipal.gov,04-12-2026,04-12-2031
+EMP078,Kiran Singh,33,A-,Administration,Clerk,9884174301,kiran.singh@municipal.gov,07-10-2026,07-10-2031
+EMP079,Pooja More,31,O+,Administration,Clerk,9821476123,pooja.more@municipal.gov,26-12-2026,26-12-2031
+EMP080,Vikas Kulkarni,40,O-,Administration,Clerk,9828934143,vikas.kulkarni@municipal.gov,01-02-2026,01-02-2031
+EMP081,Anjali Patil,36,A-,Solid Waste Management,Field Officer,9817713868,anjali.patil@municipal.gov,05-03-2026,05-03-2031
+EMP082,Sneha Pawar,36,AB-,Solid Waste Management,Field Officer,9829996749,sneha.pawar@municipal.gov,20-11-2026,20-11-2031
+EMP083,Riya Singh,47,AB-,Solid Waste Management,Field Officer,9897883217,riya.singh@municipal.gov,12-05-2026,12-05-2031
+EMP084,Priya Jadhav,43,O-,Solid Waste Management,Field Officer,9824329927,priya.jadhav@municipal.gov,18-05-2026,18-05-2031
+EMP085,Pooja Pawar,27,A-,Solid Waste Management,Field Officer,9851845692,pooja.pawar@municipal.gov,02-08-2026,02-08-2031
+EMP086,Pooja Pawar,34,O+,Solid Waste Management,Field Officer,9872793877,pooja.pawar@municipal.gov,02-05-2026,02-05-2031
+EMP087,Neha Singh,46,B+,Solid Waste Management,Field Officer,9875070677,neha.singh@municipal.gov,23-12-2026,23-12-2031
+EMP088,Arjun Sharma,28,AB-,Solid Waste Management,Field Officer,9888971543,arjun.sharma@municipal.gov,11-11-2026,11-11-2031
+EMP089,Riya Singh,42,A+,Solid Waste Management,Field Officer,9857667863,riya.singh@municipal.gov,17-09-2026,17-09-2031
+EMP090,Vikas Sharma,43,AB+,Solid Waste Management,Field Officer,9860306144,vikas.sharma@municipal.gov,27-09-2026,27-09-2031
+EMP091,Rohit Verma,49,AB-,IT Department,System Administrator,9868383321,rohit.verma@municipal.gov,23-10-2026,23-10-2031
+EMP092,Sneha Joshi,42,O-,IT Department,System Administrator,9893879658,sneha.joshi@municipal.gov,12-04-2026,12-04-2031
+EMP093,Sagar More,30,B-,IT Department,System Administrator,9829635799,sagar.more@municipal.gov,28-01-2026,28-01-2031
+EMP094,Akash Joshi,46,AB-,IT Department,System Administrator,9859797027,akash.joshi@municipal.gov,10-06-2026,10-06-2031
+EMP095,Riya Pawar,34,AB-,IT Department,System Administrator,9819659669,riya.pawar@municipal.gov,21-04-2026,21-04-2031
+EMP096,Raj Kulkarni,45,O+,IT Department,System Administrator,9814796058,raj.kulkarni@municipal.gov,20-05-2026,20-05-2031
+EMP097,Sneha Patil,26,B+,IT Department,System Administrator,9850069232,sneha.patil@municipal.gov,10-12-2026,10-12-2031
+EMP098,Pooja More,43,B+,IT Department,System Administrator,9890720953,pooja.more@municipal.gov,13-07-2026,13-07-2031
+EMP099,Kiran Verma,25,O+,IT Department,System Administrator,9833016593,kiran.verma@municipal.gov,21-06-2026,21-06-2031
+EMP100,Anjali Verma,45,AB+,IT Department,System Administrator,9811324901,anjali.verma@municipal.gov,03-10-2026,03-10-2031
