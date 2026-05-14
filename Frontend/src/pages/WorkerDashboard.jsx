@@ -1,121 +1,152 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 import './WorkerDashboard.css';
-import { 
-  FaTasks, FaHistory, FaSignOutAlt, FaMapMarkerAlt, 
-  FaClock, FaCheckCircle, FaCamera
-} from 'react-icons/fa';
+import { FiCheckCircle, FiClock, FiMapPin, FiCamera, FiLogOut, FiArrowRight } from 'react-icons/fi';
 
 const WorkerDashboard = () => {
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      return (savedUser && savedUser !== 'undefined') ? JSON.parse(savedUser) : null;
+    } catch (e) { return null; }
+  });
+  const [showResolveModal, setShowResolveModal] = useState(null);
+  const [completionNote, setCompletionNote] = useState('');
   const navigate = useNavigate();
-  const [selectedTask, setSelectedTask] = useState(null);
-  const [showUpload, setShowUpload] = useState(false);
-  const [remark, setRemark] = useState('');
-  const [image, setImage] = useState(null);
 
-  const tasks = [
-    { id: 'CV00125', title: "Water Leakage Repair", location: "Sector 8, Mumbai", priority: "HIGH", status: "Assigned" },
-    { id: 'CV00126', title: "Garbage Collection", location: "MG Road, Pune", priority: "MEDIUM", status: "Assigned" },
-  ];
+  useEffect(() => {
+    if (!user || user.role !== 'worker') {
+      // For demo purposes, we'll allow admin to view this too, or redirect if strictly worker
+      if (!user) navigate('/login');
+    }
+    fetchTasks();
+  }, [user, navigate]);
 
-  const handleComplete = (task) => {
-    setSelectedTask(task);
-    setShowUpload(true);
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      // In a real app, we'd fetch tasks assigned to this specific worker ID
+      // For demo, we'll fetch all and filter or just show recent relevant ones
+      const response = await api.get('/dashboard/stats');
+      const allComplaints = response.data.recent_complaints || [];
+      // Filter for tasks where worker name matches or just show all for demo
+      setTasks(allComplaints.filter(c => c.status !== 'Resolved'));
+    } catch (err) {
+      console.error("Failed to load tasks");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmitProof = () => {
-    // Logic based on PRD Module 1
-    alert(`Proof submitted for ${selectedTask.id}.\nGPS: Automatically Captured\nStatus: Pending AI Verification`);
-    setShowUpload(false);
-    setSelectedTask(null);
-    setRemark('');
+  const handleResolve = async (id) => {
+    try {
+      await api.put(`/complaints/${id}/resolve`, {
+        completion_note: completionNote,
+        completion_image: "repair_site.jpg"
+      });
+      setShowResolveModal(null);
+      setCompletionNote('');
+      fetchTasks();
+    } catch (err) {
+        alert("Action failed. Please try again.");
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
   };
 
   return (
-    <div className="worker-dashboard-container">
-      {/* Sidebar - PRD Focused */}
-      <aside className="worker-sidebar">
-        <div className="sidebar-header">
-           <div className="logo-icon">🏛️</div>
-           <div className="logo-text">
-             <h3>CivicSevaAI</h3>
-             <p>ADMINISTRATION</p>
-           </div>
+    <div className="worker-app">
+      <header className="worker-header">
+        <div className="brand">
+          <img src="/civicseva_logo.png" alt="Gov Logo" />
+          <span>FIELD OPERATIVE CONSOLE</span>
         </div>
+        <div className="worker-info">
+          <span>{user?.name || 'Field Worker'}</span>
+          <button onClick={handleLogout} className="logout-icon"><FiLogOut /></button>
+        </div>
+      </header>
 
-        <nav className="sidebar-nav">
-          <div className="nav-item active"><FaTasks /> Assigned Work</div>
-          <div className="nav-item"><FaHistory /> Submission History</div>
-          <div className="nav-item logout" onClick={() => navigate('/login')}><FaSignOutAlt /> Sign Out</div>
-        </nav>
-      </aside>
-
-      {/* Main Content Area */}
-      <main className="worker-main-content">
-        <header className="worker-header">
-           <h2>Assigned Tasks</h2>
-           <div className="employee-badge">
-             <strong>Employee ID: E-442</strong>
-           </div>
-        </header>
-
-        <section className="tasks-section-prd">
-           <div className="tasks-grid">
-              {tasks.map(task => (
-                <div className="task-card-prd" key={task.id}>
-                   <div className="card-top">
-                      <span className={`tag ${task.priority.toLowerCase()}`}>{task.priority}</span>
-                      <span className="task-id">{task.id}</span>
-                   </div>
-                   <h4>{task.title}</h4>
-                   <p><FaMapMarkerAlt /> {task.location}</p>
-                   <button 
-                     className="btn-complete-prd" 
-                     onClick={() => handleComplete(task)}
-                   >
-                     Mark Work Completed
-                   </button>
-                </div>
-              ))}
-           </div>
+      <main className="worker-content">
+        <section className="summary-banner">
+          <div className="sum-item">
+            <span className="label">Active Tasks</span>
+            <span className="val">{tasks.length}</span>
+          </div>
+          <div className="sum-item">
+            <span className="label">Performance</span>
+            <span className="val">4.8 ★</span>
+          </div>
         </section>
 
-        {/* PRD Module 1: Proof Submission Modal */}
-        {showUpload && (
-          <div className="modal-overlay">
-            <div className="proof-modal">
-               <h3>Submit Work Verification</h3>
-               <p className="modal-subtitle">Complaint: <strong>{selectedTask.id}</strong></p>
-               
-               <div className="upload-box-prd">
-                  <div className="file-input-wrapper">
-                     <FaCamera className="upload-icon" />
-                     <p>Capture/Upload Completion Photo</p>
-                     <input type="file" onChange={(e) => setImage(e.target.files[0])} />
-                  </div>
-                  <div className="gps-indicator-prd">
-                     <FaMapMarkerAlt /> GPS Tracking: 18.5204, 73.8567 (Verified)
-                  </div>
-               </div>
+        <h2 className="section-title">Your Assigned Grievances</h2>
 
-               <div className="remarks-section">
-                  <label>Completion Remarks</label>
-                  <textarea 
-                    placeholder="Enter details about the resolution..." 
-                    value={remark}
-                    onChange={(e) => setRemark(e.target.value)}
-                    className="remarks-area"
-                  />
-               </div>
+        {loading ? (
+            <div className="loading-state">Syncing with Command Center...</div>
+        ) : (
+            <div className="task-list">
+                {tasks.length === 0 ? (
+                    <div className="empty-tasks">
+                        <FiCheckCircle size={48} color="#10b981" />
+                        <p>All tasks completed! No pending assignments.</p>
+                    </div>
+                ) : (
+                    tasks.map(task => (
+                        <div key={task._id} className={`task-card p-${task.priority.toLowerCase()}`}>
+                            <div className="task-header">
+                                <span className={`priority-tag ${task.priority.toLowerCase()}`}>{task.priority}</span>
+                                <span className="task-id">#{task._id.slice(-5).toUpperCase()}</span>
+                            </div>
+                            <h3 className="task-category">{task.category}</h3>
+                            <p className="task-desc">{task.message}</p>
+                            
+                            <div className="task-meta">
+                                <span><FiMapPin /> {task.city}</span>
+                                <span><FiClock /> {new Date(task.created_at).toLocaleDateString()}</span>
+                            </div>
 
-               <div className="modal-actions">
-                  <button onClick={() => setShowUpload(false)} className="btn-cancel">Back</button>
-                  <button onClick={handleSubmitProof} className="btn-submit-prd">Submit for Verification</button>
-               </div>
+                            <button className="btn-action" onClick={() => setShowResolveModal(task)}>
+                                UPDATE TASK STATUS <FiArrowRight />
+                            </button>
+                        </div>
+                    ))
+                )}
             </div>
-          </div>
         )}
       </main>
+
+      {showResolveModal && (
+          <div className="modal-overlay">
+              <div className="resolve-modal">
+                  <h3>Mark Task as Resolved</h3>
+                  <p>Issue: {showResolveModal.category}</p>
+                  
+                  <label>Work Summary</label>
+                  <textarea 
+                    placeholder="Describe the action taken..."
+                    value={completionNote}
+                    onChange={(e) => setCompletionNote(e.target.value)}
+                  />
+
+                  <div className="upload-section">
+                      <FiCamera />
+                      <span>Upload Proof of Resolution</span>
+                      <small>repair_site.jpg attached</small>
+                  </div>
+
+                  <div className="modal-btns">
+                      <button className="cancel" onClick={() => setShowResolveModal(null)}>Cancel</button>
+                      <button className="confirm" onClick={() => handleResolve(showResolveModal._id)}>Submit Completion</button>
+                  </div>
+              </div>
+          </div>
+      )}
     </div>
   );
 };

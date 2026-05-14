@@ -40,4 +40,9 @@ export const getAllComplaints = async () => {
   return response.data;
 };
 
+export const submitFeedback = async (complaintId, rating, feedback) => {
+  const response = await api.post(`/complaints/${complaintId}/feedback`, { rating, feedback });
+  return response.data;
+};
+
 export default api;

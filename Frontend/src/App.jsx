@@ -24,6 +24,7 @@ const AdminRoute = ({ children, role }) => {
 };
 
 function App() {
+  console.log("App Component Init");
   return (
     <Router>
       <div className="app-container">

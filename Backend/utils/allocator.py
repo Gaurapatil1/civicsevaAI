@@ -1,59 +1,52 @@
-from database import db
+import random
 
-# ==========================================
-# SMART TASK ALLOCATION ENGINE (Prompt 8)
-# ==========================================
-
-async def find_best_worker(category: str):
+async def find_best_worker(db, category, priority):
     """
-    Finds the best available municipal worker based on department and workload.
-    
-    Requirements:
-    - Filter workers by department (matching complaint category)
-    - Only consider workers who are 'available'
-    - Calculate workload score using the formula:
-      score = (active_tasks * 0.5) + (avg_resolution_hours * 0.3)
-    - Assign the worker with the LOWEST score (least busy/most efficient).
+    Implements a weighted scoring allocation engine as per PRD2 Section 6.7.
+    Formula balances Workload (50%), Historical Efficiency (30%), and Citizen Satisfaction (20%).
     """
-    
-    # 1. Fetch available workers for the specific department
-    # Note: We assume 'category' maps directly to 'department' in this simplistic model
-    workers_cursor = db.db.workers.find({
-        "department": category,
-        "availability": True
-    })
+    # 1. Filter workers by department matching category
+    workers_cursor = db.workers.find({"dept": category, "status": "Available"})
     workers = await workers_cursor.to_list(length=100)
-
+    
     if not workers:
-        # If no specific department worker is found, find any available worker as fallback
-        print(f"No specific workers found for {category}. Searching for general availability...")
-        workers_cursor = db.db.workers.find({"availability": True})
+        # Fallback: if no available in specific dept, find any available worker
+        workers_cursor = db.workers.find({"status": "Available"})
         workers = await workers_cursor.to_list(length=100)
-
+        
     if not workers:
         return None
 
-    # 2. Iterate and apply workload formula
     best_worker = None
     min_score = float('inf')
 
     for worker in workers:
-        # Extract metrics
+        # Extract metrics with fallbacks
         active_tasks = float(worker.get("active_tasks", 0))
-        avg_resolution_hours = float(worker.get("avg_resolution_hours", 0.0))
-        avg_rating = float(worker.get("avg_rating", 4.0)) # Default to 4.0 for new workers
+        avg_res_hours = float(worker.get("avg_resolution_hours", 24))
+        avg_rating = float(worker.get("avg_rating", 4.0))
         
-        # REVISED FORMULA: score = (active_tasks * 0.5) + (avg_resolution_hours * 0.3) + (5 - avg_rating) * 0.2
-        # - active_tasks is weighted 0.5 to prioritize current LOAD.
-        # - avg_resolution_hours is weighted 0.3 to factor in EFFICIENCY.
-        # - (5 - avg_rating) adds a penalty for poor performance to prioritize SATISFACTION.
+        # Load score (normalized: 0 to 5 tasks is common)
+        load_score = active_tasks * 1.5
         
-        workload_score = (active_tasks * 0.5) + (avg_resolution_hours * 0.3) + (5 - avg_rating) * 0.2
+        # Efficiency score (normalized: 24h as 1.0)
+        efficiency_score = (avg_res_hours / 24.0) * 1.0
         
-        print(f"Worker: {worker['name']}, Score: {workload_score:.2f} (Rating: {avg_rating})")
+        # Satisfaction score (penalty style: 5 - rating)
+        satisfaction_score = (5.0 - avg_rating) * 1.0
+        
+        # Weighted Aggregation
+        if priority in ["High", "Critical"]:
+            # For critical tasks, prioritizing efficiency and satisfaction over load
+            total_score = (load_score * 0.3) + (efficiency_score * 0.4) + (satisfaction_score * 0.3)
+        else:
+            # For routine tasks, prioritizing load balancing
+            total_score = (load_score * 0.6) + (efficiency_score * 0.2) + (satisfaction_score * 0.2)
+            
+        print(f"DEBUG: Scored Worker {worker['name']} | Total: {total_score:.2f} | Rating: {avg_rating}")
 
-        if workload_score < min_score:
-            min_score = workload_score
+        if total_score < min_score:
+            min_score = total_score
             best_worker = worker
 
     return best_worker

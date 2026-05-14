@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from database import connect_to_mongo, close_mongo_connection
+from database import connect_to_mongo, close_mongo_connection, seed_data
 
 # ==========================================
 # FASTAPI APPLICATION INITIALIZATION
@@ -29,6 +29,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_db_client():
     await connect_to_mongo()
+    await seed_data()
 
 # Shutdown event to clean up database connection
 @app.on_event("shutdown")

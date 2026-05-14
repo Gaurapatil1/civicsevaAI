@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { submitComplaint, login, register } from '../services/api';
+import api, { submitComplaint, login, register } from '../services/api';
 import './CitizenBot.css';
 import { FiSend, FiUser, FiInfo, FiCheckCircle, FiShield, FiLogOut } from 'react-icons/fi';
 
@@ -101,18 +101,36 @@ const CitizenBot = () => {
       }
       else if (convState === 'CHAT') {
         setTempData({ ...tempData, complaint_text: text });
-        setMessages(prev => [...prev, { id: Date.now()+1, text: "Analyzing your request... Please select the appropriate category for this issue:", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+        setMessages(prev => [...prev, { 
+          id: Date.now()+1, 
+          text: "I understand the issue. To ensure this is routed to the correct municipal department, please select the most relevant category from the options below:", 
+          sender: 'bot', 
+          time: new Date().toLocaleTimeString() 
+        }]);
         setConvState('AWAITING_CATEGORY');
       }
       else if (convState === 'AWAITING_CATEGORY') {
         const response = await submitComplaint(tempData.complaint_text, text, user.name, user.city);
+        const cid = response.id;
+        setTempData({ ...tempData, current_complaint_id: cid });
         setMessages(prev => [...prev, { 
           id: Date.now()+2, 
-          text: `Complaint registered successfully. ✅\nReference ID: ${response.id.slice(-6).toUpperCase()}\nAssigned Worker: ${response.assigned_worker ? response.assigned_worker.name : 'Processing'}\nPriority: ${response.priority}`, 
+          text: `Your grievance has been officially registered with the command center.\n\n📄 Ref ID: ${cid.slice(-6).toUpperCase()}\n👷 Assigned Operative: ${response.assigned_worker ? response.assigned_worker.name : 'System Allocation Pending'}\n⚠️ Priority Level: ${response.priority}\n\nYou will be notified as soon as our field staff begins work.`, 
           sender: 'bot', 
           time: new Date().toLocaleTimeString() 
         }]);
         setConvState('CHAT');
+
+        // SIMULATE RESOLUTION FOR DEMO
+        setTimeout(() => {
+            setMessages(prev => [...prev, {
+                id: Date.now()+10,
+                text: "Your complaint has been resolved successfully. Amit Patil has updated the task.\n\nNote: 'Water leakage repaired successfully.'\nProof Image: resolution_proof.jpg\n\nPlease rate your experience with us.",
+                sender: 'bot',
+                time: new Date().toLocaleTimeString()
+            }]);
+            setConvState('AWAITING_RATING');
+        }, 8000);
       }
     } catch (e) {
       setMessages(prev => [...prev, { id: Date.now()+1, text: "We are currently experiencing technical difficulties. Please try again later.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
@@ -121,9 +139,30 @@ const CitizenBot = () => {
     }
   };
 
+  const handleRating = async (rating) => {
+    setLoading(true);
+    try {
+        await api.post(`/complaints/${tempData.current_complaint_id}/feedback`, {
+            rating: rating,
+            feedback: "Problem solved quickly."
+        });
+        setMessages(prev => [...prev, { 
+            id: Date.now(), 
+            text: `You rated us ${rating} stars. Thank you for your feedback! It helps us improve our municipal services. Jai Hind!`, 
+            sender: 'bot', 
+            time: new Date().toLocaleTimeString() 
+        }]);
+        setConvState('CHAT');
+    } catch (err) {
+        console.error(err);
+    } finally {
+        setLoading(false);
+    }
+  };
+
   const handleSend = (e) => {
     e.preventDefault();
-    if (!input.trim() || loading) return;
+    if (!input.trim() || loading || convState === 'AWAITING_RATING') return;
     const i = input;
     setInput('');
     processResponse(i);
@@ -182,6 +221,15 @@ const CitizenBot = () => {
                           ))}
                         </div>
                       )}
+                      {convState === 'AWAITING_RATING' && (
+                        <div className="rating-options">
+                          {[1,2,3,4,5].map(v => (
+                            <button key={v} onClick={() => handleRating(v)} className="rating-btn">
+                                {v} ★
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </>
                 )}
                 <span className="message-time">{m.time}</span>
@@ -195,12 +243,12 @@ const CitizenBot = () => {
         <form className="chat-input" onSubmit={handleSend}>
           <input 
             type={convState.includes('PASSWORD') ? 'password' : 'text'}
-            placeholder="Type your message here..."
+            placeholder={convState === 'AWAITING_RATING' ? "Please select a rating above" : "Type your message here..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            disabled={loading}
+            disabled={loading || convState === 'AWAITING_RATING'}
           />
-          <button type="submit" disabled={loading || !input.trim()}>
+          <button type="submit" disabled={loading || !input.trim() || convState === 'AWAITING_RATING'}>
             <FiSend />
           </button>
         </form>
