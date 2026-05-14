@@ -37,7 +37,11 @@ async def connect_to_mongo():
             logger.info("🛠️  Running in MOCK MODE (Simulated DB)")
             # In mock mode, we still initialize the client to the URL for "live-mocking" 
             # or it can be used for local testing.
-            db.client = AsyncIOMotorClient(MONGO_URL)
+            db.client = AsyncIOMotorClient(
+                MONGO_URL, 
+                serverSelectionTimeoutMS=20000,
+                tlsAllowInvalidCertificates=True
+            )
             db.db = db.client[DATABASE_NAME]
             
             # Seed mock data
@@ -48,7 +52,11 @@ async def connect_to_mongo():
             if not MONGO_URL:
                 raise ValueError("MONGO_URL not found in .env")
                 
-            db.client = AsyncIOMotorClient(MONGO_URL)
+            db.client = AsyncIOMotorClient(
+                MONGO_URL, 
+                serverSelectionTimeoutMS=20000,
+                tlsAllowInvalidCertificates=True
+            )
             db.db = db.client[DATABASE_NAME]
             
             # Verify connection by pinging the server

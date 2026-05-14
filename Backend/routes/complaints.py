@@ -15,13 +15,13 @@ router = APIRouter(prefix="/complaints", tags=["Complaints"])
 @router.post("/submit-complaint", status_code=status.HTTP_201_CREATED)
 async def submit_complaint(complaint: ComplaintCreate):
     """
-    Submits a new municipal complaint.
+    Submits a new municipal grievance. (Aligned with bot.md workflow)
     
     Workflow:
-    1. Receive text message.
+    1. Receive message, citizen_name, and city.
     2. Run AI models to predict category and priority.
     3. Run task allocation engine to find the best worker.
-    4. Save everything in MongoDB 'complaints' collection.
+    4. Save in MongoDB 'complaints' collection with citizen info.
     5. Return the full complaint details.
     """
     
@@ -30,9 +30,10 @@ async def submit_complaint(complaint: ComplaintCreate):
         raise HTTPException(status_code=500, detail="Database not connected.")
 
     # 2. AI Category and Priority Prediction
-    # This calls our joblib-loaded models
-    category, priority = predict_category_and_priority(complaint.message)
-    print(f"AI Prediction: Category={category}, Priority={priority}")
+    pred_cat, priority = predict_category_and_priority(complaint.message)
+    category = complaint.category if complaint.category else pred_cat
+    
+    print(f"AI Prediction: Category={pred_cat}, Priority={priority}")
 
     # 3. Worker Allocation
     # Finds the worker with the lowest workload in the predicted category
@@ -53,11 +54,13 @@ async def submit_complaint(complaint: ComplaintCreate):
     complaint_id = str(uuid.uuid4())
     complaint_record = {
         "_id": complaint_id,
+        "citizen_name": complaint.citizen_name,
+        "city": complaint.city,
         "message": complaint.message,
         "category": category,
         "priority": priority,
         "assigned_worker": worker_data,
-        "status": "Assigned" if worker_data else "Pending",
+        "status": "Pending",
         "created_at": datetime.utcnow()
     }
 
@@ -70,6 +73,8 @@ async def submit_complaint(complaint: ComplaintCreate):
     # 6. Format and return response
     return {
         "id": complaint_id,
+        "citizen_name": complaint.citizen_name,
+        "city": complaint.city,
         "message": complaint.message,
         "category": category,
         "priority": priority,

@@ -6,5 +6,7 @@ python-dotenv
 pandas
 scikit-learn
 joblib
-pydantic
+pydantic[email]
 python-multipart
+bcrypt
+passlib[bcrypt]
