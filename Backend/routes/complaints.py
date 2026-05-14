@@ -122,6 +122,7 @@ async def resolve_complaint(complaint_id: str, update: ResolutionUpdate):
         "status": "Resolved",
         "completion_note": update.completion_note,
         "completion_image": update.completion_image,
+        "gps_coordinates": update.gps_coordinates,
         "resolved_at": datetime.utcnow()
     }
 
@@ -135,6 +136,21 @@ async def resolve_complaint(complaint_id: str, update: ResolutionUpdate):
         )
 
     return {"status": "success", "message": "Complaint resolved successfully"}
+
+@router.get("/{complaint_id}")
+async def get_complaint(complaint_id: str):
+    """
+    Get complaint details by ID, used for citizen polling status.
+    """
+    if db.db is None:
+        raise HTTPException(status_code=500, detail="Database not connected.")
+
+    complaint = await db.db.complaints.find_one({"_id": complaint_id})
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Complaint not found")
+        
+    complaint["id"] = complaint["_id"]
+    return complaint
 
 @router.post("/{complaint_id}/feedback")
 async def submit_feedback(complaint_id: str, feedback: CitizenFeedback):

@@ -103,11 +103,23 @@ async def seed_data():
                     "message": row['Complaint Text'],
                     "category": random.choice(["Water Supply", "Waste Management", "Electricity", "Roads/Potholes", "Sanitation"]),
                     "priority": random.choice(["Low", "Medium", "High", "Critical"]),
-                    "status": random.choice(["Pending", "In Progress", "Resolved"]),
+                    "status": "Pending",
                     "city": "Mumbai",
                     "created_at": datetime.now(),
                     "assigned_worker": None
                 })
+            
+            # Explicitly assigned tasks to Amit Pawar (Test Worker)
+            amit_worker = {
+                "worker_id": "amit_id", 
+                "name": "Amit Pawar", 
+                "department": "Water Supply"
+            }
+            if len(seeded_c) > 3:
+                for i in range(4):
+                    seeded_c[i]["assigned_worker"] = amit_worker
+                    seeded_c[i]["status"] = "Pending"
+
             if seeded_c:
                 await db.db.complaints.insert_many(seeded_c)
 

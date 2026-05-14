@@ -5,121 +5,111 @@ import './CitizenBot.css';
 import { FiSend, FiUser, FiInfo, FiCheckCircle, FiShield, FiLogOut } from 'react-icons/fi';
 
 const CitizenBot = () => {
+  const [messages, setMessages] = useState([
+    { id: 1, text: "Jai Hind! I am your AI Municipal Assistant. How can I serve you today?", sender: 'bot', time: new Date().toLocaleTimeString() }
+  ]);
+  const [inputText, setInputText] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [convState, setConvState] = useState('AWAITING_AUTH_CHOICE'); 
+  const [tempData, setTempData] = useState({});
   const navigate = useNavigate();
   const scrollRef = useRef(null);
 
-  const [convState, setConvState] = useState('START');
-  const [tempData, setTempData] = useState({});
-  const [user, setUser] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem('user');
-      return (savedUser && savedUser !== 'undefined') ? JSON.parse(savedUser) : null;
-    } catch (e) { return null; }
-  });
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-
   useEffect(() => {
-    if (!user) {
-      setMessages([
-        { id: 1, text: "Welcome to the Municipal Complaint Assistant. Please log in or register to report a civic issue.", sender: 'bot', time: new Date().toLocaleTimeString() }
-      ]);
-      setConvState('AWAITING_AUTH_CHOICE');
+    const savedUser = localStorage.getItem('user');
+    if (savedUser && savedUser !== 'undefined') {
+      try {
+        const parsed = JSON.parse(savedUser);
+        setUser(parsed);
+        setConvState('CHAT');
+        setMessages(prev => [...prev, { id: Date.now(), text: `Welcome back, ${parsed.name}. Please describe the municipal issue you'd like to report.`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
+      } catch (e) {
+        console.error("Error parsing user", e);
+      }
     } else {
-      setMessages([
-        { id: 1, text: `Welcome back, ${user.name}. How can the municipality assist you today? Please describe your grievance.`, sender: 'bot', time: new Date().toLocaleTimeString() }
-      ]);
-      setConvState('CHAT');
+      setMessages(prev => [...prev, { 
+        id: Date.now(), 
+        text: "To provide personalized assistance, would you like to Log In or Register as a guest?", 
+        sender: 'bot', 
+        time: new Date().toLocaleTimeString() 
+      }]);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    let intervalId;
+    if (convState === 'AWAITING_WORKER_RESOLUTION' && tempData.current_complaint_id) {
+      intervalId = setInterval(async () => {
+         try {
+           const res = await api.get(`/complaints/${tempData.current_complaint_id}`);
+           if (res.data && res.data.status === 'Resolved') {
+             clearInterval(intervalId);
+             setMessages(prev => [...prev, {
+                id: Date.now()+40,
+                text: `✅ Resolution Verified. GPS data: ${res.data.gps_coordinates}\n\nAre you satisfied with the work? Please reply 'Yes' to Close or 'No' to Reopen for Admin Review.`,
+                image: res.data.completion_image,
+                sender: 'bot',
+                time: new Date().toLocaleTimeString()
+             }]);
+             setConvState('AWAITING_CLOSURE_CONFIRM');
+           }
+         } catch(e) {
+           console.error("Polling error", e);
+         }
+      }, 5000);
+    }
+    return () => clearInterval(intervalId);
+  }, [convState, tempData.current_complaint_id]);
 
   const finalizeSubmission = async (response) => {
     const cid = response.id;
     setTempData({ ...tempData, current_complaint_id: cid });
     setMessages(prev => [...prev, { 
       id: Date.now()+2, 
-      text: `Your grievance has been officially registered with the command center.\n\n📄 Ref ID: ${cid.slice(-6).toUpperCase()}\n👷 Assigned Operative: ${response.assigned_worker ? response.assigned_worker.name : 'System Allocation Pending'}\n⚠️ Priority Level: ${response.priority}\n\nYou will be notified as soon as our field staff begins work.`, 
+      text: `Your grievance has been officially registered.\n\n📄 Ref ID: ${cid.slice(-6).toUpperCase()}\n👷 Assigned Operative: ${response.assigned_worker ? response.assigned_worker.name : 'System Allocation Pending'}\n⚠️ Priority Level: ${response.priority}\n\nWait here! We will notify you once the worker updates the status.`, 
       sender: 'bot', 
       time: new Date().toLocaleTimeString() 
     }]);
-    setConvState('CHAT');
-
-    // SIMULATE RESOLUTION FOR DEMO
-    setTimeout(() => {
-        setMessages(prev => [...prev, {
-            id: Date.now()+30,
-            text: "Official Update: Your complaint has been resolved successfully by Amit Patil.\n\nNote: 'Repaired and verified.'\nProof: resolution_proof.jpg\n\nPlease rate your experience with us.",
-            sender: 'bot',
-            time: new Date().toLocaleTimeString()
-        }]);
-        setConvState('AWAITING_RATING');
-    }, 10000);
+    setConvState('AWAITING_WORKER_RESOLUTION');
   };
 
   const handleLogout = () => {
     localStorage.clear();
     setUser(null);
-    setConvState('START');
-    setMessages([]);
-    setTempData({});
+    setConvState('AWAITING_AUTH_CHOICE');
+    setMessages([{ id: Date.now(), text: "You have been logged out. How can I help you today?", sender: 'bot', time: new Date().toLocaleTimeString() }]);
   };
 
+  const categories = ["Water Supply", "Electricity", "Waste Management", "Roads", "Drainage", "Traffic", "Public Safety"];
+
   const processResponse = async (text) => {
-    const userMsg = { id: Date.now(), text, sender: 'user', time: new Date().toLocaleTimeString() };
-    setMessages(prev => [...prev, userMsg]);
+    if (!text.trim()) return;
+    
+    setMessages(prev => [...prev, { id: Date.now(), text, sender: 'user', time: new Date().toLocaleTimeString() }]);
+    setInputText('');
     setLoading(true);
 
     try {
       if (convState === 'AWAITING_AUTH_CHOICE') {
-        const choice = text.toLowerCase();
-        if (choice.includes('register')) {
-          setMessages(prev => [...prev, { id: Date.now()+1, text: "Please provide your Full Name to begin registration:", sender: 'bot', time: new Date().toLocaleTimeString() }]);
-          setConvState('AWAITING_REG_NAME');
+        if (text.toLowerCase().includes('log')) {
+          setConvState('AWAITING_LOGIN');
+          setMessages(prev => [...prev, { id: Date.now()+1, text: "Please enter your registered email.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
         } else {
-          setMessages(prev => [...prev, { id: Date.now()+1, text: "Please enter your Registered Email Address:", sender: 'bot', time: new Date().toLocaleTimeString() }]);
-          setConvState('AWAITING_LOGIN_EMAIL');
+          setConvState('AWAITING_REGISTER');
+          setMessages(prev => [...prev, { id: Date.now()+1, text: "Please enter your name for guest registration.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
         }
+      } 
+      else if (convState === 'AWAITING_LOGIN') {
+        const userData = await login(text, '123');
+        setUser(userData);
+        setMessages(prev => [...prev, { id: Date.now()+1, text: `Authenticated as ${userData.name}. Please describe the municipal issue.`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
+        setConvState('CHAT');
       }
-      else if (convState === 'AWAITING_LOGIN_EMAIL') {
-        setTempData({ ...tempData, email: text });
-        setMessages(prev => [...prev, { id: Date.now()+1, text: "Thank you. Now please enter your Password:", sender: 'bot', time: new Date().toLocaleTimeString() }]);
-        setConvState('AWAITING_LOGIN_PASSWORD');
-      }
-      else if (convState === 'AWAITING_LOGIN_PASSWORD') {
-        try {
-          const res = await login(tempData.email, text);
-          localStorage.setItem('user', JSON.stringify(res.user));
-          localStorage.setItem('token', res.token);
-          setUser(res.user);
-          if (res.user.role === 'admin') navigate('/admin');
-          else setConvState('CHAT');
-        } catch (err) {
-          setMessages(prev => [...prev, { id: Date.now()+1, text: "Invalid credentials. Please select 'Log In' to try again.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
-          setConvState('AWAITING_AUTH_CHOICE');
-        }
-      }
-      else if (convState === 'AWAITING_REG_NAME') {
-          setTempData({ ...tempData, name: text });
-          setMessages(prev => [...prev, { id: Date.now()+1, text: "Enter your Email Address for account updates:", sender: 'bot', time: new Date().toLocaleTimeString() }]);
-          setConvState('AWAITING_REG_EMAIL');
-      }
-      else if (convState === 'AWAITING_REG_EMAIL') {
-          setTempData({ ...tempData, email: text });
-          setMessages(prev => [...prev, { id: Date.now()+1, text: "Create a password for your account:", sender: 'bot', time: new Date().toLocaleTimeString() }]);
-          setConvState('AWAITING_REG_PASSWORD');
-      }
-      else if (convState === 'AWAITING_REG_PASSWORD') {
-          const regData = { ...tempData, password: text, city: 'Mumbai', phone: '0000000000' };
-          await register(regData);
-          const lr = await login(regData.email, text);
-          localStorage.setItem('user', JSON.stringify(lr.user));
-          localStorage.setItem('token', lr.token);
-          setUser(lr.user);
+      else if (convState === 'AWAITING_REGISTER') {
+          const userData = await register(text, text, '123', 'Mumbai');
+          setUser(userData);
+          setMessages(prev => [...prev, { id: Date.now()+1, text: `Welcome ${userData.name}. What municipal issue can I help with?`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
           setConvState('CHAT');
       }
       else if (convState === 'CHAT') {
@@ -127,7 +117,7 @@ const CitizenBot = () => {
         setTempData({ ...tempData, complaint_text: text, pred_category: pred.category, pred_priority: pred.priority });
         setMessages(prev => [...prev, { 
           id: Date.now()+1, 
-          text: `I've analyzed your request. 📊 AI Prediction:\n\nCategory: ${pred.category}\nPriority: ${pred.priority}\n\nIs this classification correct?`, 
+          text: `📊 AI Prediction:\nCategory: ${pred.category}\nPriority: ${pred.priority}\n\nIs this correct?`, 
           sender: 'bot', 
           time: new Date().toLocaleTimeString() 
         }]);
@@ -138,12 +128,7 @@ const CitizenBot = () => {
             const response = await submitComplaint(tempData.complaint_text, tempData.pred_category, user.name, user.city);
             await finalizeSubmission(response);
         } else {
-            setMessages(prev => [...prev, { 
-              id: Date.now()+1, 
-              text: "Apologies for the miscalculation. Please select the correct category manually from the list below:", 
-              sender: 'bot', 
-              time: new Date().toLocaleTimeString() 
-            }]);
+            setMessages(prev => [...prev, { id: Date.now()+1, text: "Please select the correct category:", sender: 'bot', time: new Date().toLocaleTimeString() }]);
             setConvState('AWAITING_CATEGORY');
         }
       }
@@ -151,132 +136,111 @@ const CitizenBot = () => {
         const response = await submitComplaint(tempData.complaint_text, text, user.name, user.city);
         await finalizeSubmission(response);
       }
+      else if (convState === 'AWAITING_CLOSURE_CONFIRM') {
+          if (text.toLowerCase() === 'yes') {
+              setMessages(prev => [...prev, { id: Date.now()+1, text: "Excellent. Please rate your experience (1-5).", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+              setConvState('AWAITING_RATING');
+          } else {
+              setMessages(prev => [...prev, { id: Date.now()+1, text: "Task reopened for Admin Review.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+              setConvState('CHAT');
+          }
+      }
+      else if (convState === 'AWAITING_RATING') {
+        await api.post(`/complaints/${tempData.current_complaint_id}/feedback`, { rating: parseInt(text), feedback: "Bot feedback" });
+        setMessages(prev => [...prev, { id: Date.now()+2, text: "Thank you! Jai Hind! 🇮🇳", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+        setConvState('CHAT');
+      }
     } catch (e) {
-      setMessages(prev => [...prev, { id: Date.now()+1, text: "We are currently experiencing technical difficulties. Please try again later.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+      setMessages(prev => [...prev, { id: Date.now()+1, text: "Technical error. Try again later.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRating = async (rating) => {
-    setLoading(true);
-    try {
-        await api.post(`/complaints/${tempData.current_complaint_id}/feedback`, {
-            rating: rating,
-            feedback: "Problem solved quickly."
-        });
-        setMessages(prev => [...prev, { 
-            id: Date.now(), 
-            text: `You rated us ${rating} stars. Thank you for your feedback! It helps us improve our municipal services. Jai Hind!`, 
-            sender: 'bot', 
-            time: new Date().toLocaleTimeString() 
-        }]);
-        setConvState('CHAT');
-    } catch (err) {
-        console.error(err);
-    } finally {
-        setLoading(false);
-    }
-  };
-
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!input.trim() || loading || convState === 'AWAITING_RATING') return;
-    const i = input;
-    setInput('');
-    processResponse(i);
-  };
-
   return (
     <div className="bot-page">
-      <nav className="gov-navbar">
-        <div className="nav-container">
-          <div className="nav-item active">Home</div>
-          <div className="nav-item">About Us</div>
-          <div className="nav-item">Help</div>
-        </div>
-        <div style={{display: 'flex', gap: '15px'}}>
-          <button onClick={() => navigate('/login')} style={{fontSize: '0.8rem', color: '#003366', fontWeight: 600}}>Admin Dashboard</button>
-        </div>
-      </nav>
-
       <header className="bot-header">
         <div className="header-content">
-          <img src="/civicseva_logo.png" alt="Gov Logo" className="gov-seal-img" />
+          <img src="/emblem.png" alt="Gov" className="gov-seal-img" />
           <div className="header-text">
-            <h1>Municipal Grievance Portal</h1>
-            <p>Unified Complaint Redressal System {user ? `| ${user.city}` : ''}</p>
+            <h1>CivicSevaAI</h1>
+            <p>Government of India • Municipal Assistant</p>
           </div>
         </div>
-        <div style={{display: 'flex', alignItems: 'center', gap: '15px'}}>
-          <img src="/pngwing.com.png" alt="Swachh Bharat" className="swachh-logo" />
-          {user && <button onClick={handleLogout} className="logout-btn" style={{color: 'white'}}><FiLogOut /></button>}
+        <div className="header-logos">
+           <img src="/swachh_bharat.png" alt="Swachh" className="swachh-logo" />
+           {user && <button onClick={handleLogout} className="logout-btn"><FiLogOut /></button>}
         </div>
       </header>
 
       <div className="chat-container">
         <div className="chat-messages">
-          {messages.map(m => (
+          {messages.map((m, i) => (
             <div key={m.id} className={`message-wrapper ${m.sender}`}>
               <div className="avatar">
-                {m.sender === 'bot' ? <FiShield /> : <FiUser />}
+                {m.sender === 'bot' ? <img src="/civicseva_logo.png" style={{width: '24px'}} /> : <FiUser />}
               </div>
               <div className="message-content">
-                <div className="message-bubble" style={{whiteSpace: 'pre-wrap'}}>{m.text}</div>
-                
-                {/* Official Action Buttons */}
-                {m.id === messages[messages.length-1].id && !loading && (
-                    <>
-                      {convState === 'AWAITING_PREDICTION_CONFIRM' && (
-                        <div className="auth-options">
-                          <button onClick={() => processResponse('Yes')} className="auth-btn">Yes, Correct</button>
-                          <button onClick={() => processResponse('No')} className="auth-btn" style={{background: '#64748b'}}>No, Change</button>
-                        </div>
-                      )}
-                      {convState === 'AWAITING_AUTH_CHOICE' && (
-                        <div className="auth-options">
-                          <button onClick={() => processResponse('Log In')} className="auth-btn">Log In</button>
-                          <button onClick={() => processResponse('Register')} className="auth-btn" style={{background: '#64748b'}}>Register</button>
-                        </div>
-                      )}
-                      {convState === 'AWAITING_CATEGORY' && (
-                        <div className="category-options">
-                          {['Waste Management', 'Water Supply', 'Electricity', 'Roads/Potholes', 'Sanitation', 'Public Safety'].map(cat => (
-                            <button key={cat} onClick={() => processResponse(cat)} className="cat-btn">{cat}</button>
-                          ))}
-                        </div>
-                      )}
-                      {convState === 'AWAITING_RATING' && (
-                        <div className="rating-options">
-                          {[1,2,3,4,5].map(v => (
-                            <button key={v} onClick={() => handleRating(v)} className="rating-btn">
-                                {v} ★
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </>
+                <div className="message-bubble">
+                  {m.text.split('\n').map((line, idx) => <p key={idx} style={{margin: 0}}>{line}</p>)}
+                  {m.image && m.image !== "repair_site.jpg" && (
+                    <img src={m.image} alt="Proof" style={{marginTop:'10px', maxWidth:'100%', borderRadius:'8px'}}/>
+                  )}
+                </div>
+                {/* INTERACTIVE BUTTONS */}
+                {i === messages.length - 1 && !loading && (
+                    <div className="interactive-options">
+                        {convState === 'AWAITING_AUTH_CHOICE' && (
+                            <div className="btn-group">
+                                <button onClick={() => processResponse('Log In')} className="opt-btn">Log In</button>
+                                <button onClick={() => processResponse('Register')} className="opt-btn">Register</button>
+                            </div>
+                        )}
+                        {convState === 'AWAITING_PREDICTION_CONFIRM' && (
+                            <div className="btn-group">
+                                <button onClick={() => processResponse('Yes')} className="opt-btn confirm">Correct</button>
+                                <button onClick={() => processResponse('No')} className="opt-btn deny">Change</button>
+                            </div>
+                        )}
+                        {convState === 'AWAITING_CLOSURE_CONFIRM' && (
+                            <div className="btn-group">
+                                <button onClick={() => processResponse('Yes')} className="opt-btn confirm">Yes, Close</button>
+                                <button onClick={() => processResponse('No')} className="opt-btn deny">No, Reopen</button>
+                            </div>
+                        )}
+                        {convState === 'AWAITING_CATEGORY' && (
+                            <div className="category-options">
+                                {categories.map(c => <button key={c} onClick={() => processResponse(c)} className="cat-btn">{c}</button>)}
+                            </div>
+                        )}
+                        {convState === 'AWAITING_RATING' && (
+                            <div className="rating-options">
+                                {[1,2,3,4,5].map(n => <button key={n} onClick={() => processResponse(n.toString())} className="rate-btn">{n}★</button>)}
+                            </div>
+                        )}
+                    </div>
                 )}
                 <span className="message-time">{m.time}</span>
               </div>
             </div>
           ))}
-          {loading && <div className="message-bubble loading">...</div>}
+          {loading && <div className="typing-indicator">AI Assistant is thinking...</div>}
           <div ref={scrollRef} />
         </div>
 
-        <form className="chat-input" onSubmit={handleSend}>
+        <div className="chat-input shadow-lg">
           <input 
-            type={convState.includes('PASSWORD') ? 'password' : 'text'}
-            placeholder={convState === 'AWAITING_RATING' ? "Please select a rating above" : "Type your message here..."}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={loading || convState === 'AWAITING_RATING'}
+            type="text" 
+            placeholder="Describe your issue..." 
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && processResponse(inputText)}
+            disabled={loading}
           />
-          <button type="submit" disabled={loading || !input.trim() || convState === 'AWAITING_RATING'}>
+          <button onClick={() => processResponse(inputText)} disabled={loading}>
             <FiSend />
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );

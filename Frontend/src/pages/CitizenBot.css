@@ -1,32 +1,22 @@
 /* 
-  CIVIC SEVA AI - MUNICIPAL COMPLAINT ASSISTANT
-  Redesigned as per DOC/design.md
+  CIVIC SEVA AI - OFFICIAL MUNICIPAL ASSISTANT (PREMIUM v1 REVERT)
 */
+
+:root {
+  --gov-navy: #003366;
+  --gov-blue: #1a4f9c;
+  --gov-gold: #f4b41a;
+  --bg-soft: #f0f2f5;
+}
 
 .bot-page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f0f2f5; /* Classic chat background */
+  background-color: var(--bg-soft);
   font-family: 'Inter', sans-serif;
 }
 
-/* NAVBAR: Simple & Official */
-.gov-navbar {
-  background: white;
-  padding: 0.5rem 2rem;
-  border-bottom: 1px solid var(--gov-border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 100;
-}
-
-.nav-container { display: flex; gap: 1.5rem; }
-.nav-item { font-size: 0.8rem; font-weight: 600; color: var(--gov-text-muted); cursor: pointer; }
-.nav-item.active { color: var(--gov-navy); border-bottom: 2px solid var(--gov-navy); }
-
-/* HEADER: Trustworthy Branding */
 .bot-header {
   background: var(--gov-navy);
   color: white;
@@ -34,51 +24,31 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  z-index: 100;
 }
 
-.header-content {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
+.header-content { display: flex; align-items: center; gap: 1rem; }
+.gov-seal-img { width: 45px; }
+.header-text h1 { font-size: 1.25rem; font-weight: 800; margin: 0; }
+.header-text p { font-size: 0.75rem; margin: 0; opacity: 0.8; letter-spacing: 0.5px; }
 
-.gov-seal-img {
-  width: 45px;
-  height: 45px;
-  background: white;
-  border-radius: 50%;
-  padding: 5px;
-}
+.header-logos { display: flex; align-items: center; gap: 1.5rem; }
+.swachh-logo { height: 35px; filter: brightness(0) invert(1); }
+.logout-btn { background: none; border: none; color: white; cursor: pointer; font-size: 1.1rem; }
 
-.header-text h1 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0;
-  color: white;
-}
-
-.header-text p {
-  font-size: 0.75rem;
-  margin: 0;
-  opacity: 0.8;
-}
-
-.swachh-logo { height: 40px; filter: brightness(0) invert(1); }
-
-/* CHAT CONTAINER: Enterprise Grade */
+/* CHAT CONTAINER */
 .chat-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  max-width: 800px;
+  max-width: 850px;
   width: 100%;
-  margin: 0 auto;
+  margin: 1rem auto;
   background: white;
-  position: relative;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
 .chat-messages {
@@ -87,160 +57,48 @@
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-  background-blend-mode: overlay;
-  background-color: rgba(255, 255, 255, 0.96);
+  gap: 1.5rem;
+  background: #ffffff url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
 }
 
-.message-wrapper {
-  display: flex;
-  gap: 0.75rem;
-  max-width: 80%;
-  animation: fadeIn 0.3s ease-out;
-}
+.message-wrapper { display: flex; gap: 1rem; max-width: 80%; animation: slideUp 0.3s ease-out; }
+.message-wrapper.user { align-self: flex-end; flex-direction: row-reverse; }
 
-.message-wrapper.user {
-  flex-direction: row-reverse;
-  align-self: flex-end;
-}
-
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #f1f5f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .bot .avatar { background: var(--gov-navy); color: white; }
 
-.message-content {
-  display: flex;
-  flex-direction: column;
-}
+.message-content { display: flex; flex-direction: column; }
+.message-bubble { padding: 0.85rem 1.25rem; border-radius: 18px; font-size: 0.95rem; line-height: 1.6; }
+.bot .message-bubble { background: #f1f5f9; color: #1e293b; border-top-left-radius: 4px; }
+.user .message-bubble { background: var(--gov-blue); color: white; border-top-right-radius: 4px; }
 
-.message-bubble {
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
+.message-time { font-size: 0.65rem; color: #94a3b8; margin-top: 4px; align-self: flex-end; }
 
-.bot .message-bubble {
-  background: white;
-  color: var(--gov-text-main);
-  border-top-left-radius: 2px;
-}
+/* INTERACTIVE */
+.interactive-options { margin-top: 1rem; }
+.btn-group { display: flex; gap: 8px; }
+.opt-btn { background: white; border: 1.5px solid var(--gov-blue); color: var(--gov-blue); padding: 6px 16px; border-radius: 20px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.opt-btn:hover { background: var(--gov-blue); color: white; }
+.opt-btn.confirm { border-color: #10b981; color: #10b981; }
+.opt-btn.confirm:hover { background: #10b981; color: white; }
+.opt-btn.deny { border-color: #ef4444; color: #ef4444; }
+.opt-btn.deny:hover { background: #ef4444; color: white; }
 
-.user .message-bubble {
-  background: #dcf8c6;
-  color: #1a1a1a;
-  border-top-right-radius: 2px;
-}
+.category-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.cat-btn { background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+.cat-btn:hover { background: #eff6ff; border-color: var(--gov-blue); }
 
-.message-time {
-  font-size: 0.7rem;
-  color: var(--gov-text-muted);
-  margin-top: 0.25rem;
-  align-self: flex-end;
-}
+.rating-options { display: flex; gap: 10px; }
+.rate-btn { background: white; border: 1px solid #e2e8f0; padding: 5px 12px; border-radius: 10px; font-weight: 700; color: #f59e0b; }
+.rate-btn:hover { background: #fffbeb; border-color: #f59e0b; }
 
-/* INPUT AREA: Practical */
-.chat-input {
-  display: flex;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  background: #f0f2f5;
-  border-top: 1px solid #e2e8f0;
-}
+/* INPUT */
+.chat-input { display: flex; gap: 1rem; padding: 1rem 2rem; background: white; border-top: 1px solid #f1f5f9; }
+.chat-input input { flex: 1; padding: 0.85rem 1.5rem; border-radius: 25px; border: 1px solid #e2e8f0; background: #f8fafc; outline: none; }
+.chat-input input:focus { border-color: var(--gov-blue); background: white; }
+.chat-input button { width: 48px; height: 48px; border-radius: 50%; background: var(--gov-navy); color: white; border: none; font-size: 1.2rem; cursor: pointer; }
 
-.chat-input input {
-  flex: 1;
-  padding: 0.75rem 1.25rem;
-  border-radius: 24px;
-  border: 1px solid #e2e8f0;
-  background: white;
-  outline: none;
-  font-size: 0.95rem;
-}
+/* Typing */
+.typing-indicator { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-top: 1rem; }
 
-.chat-input button {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  background: var(--gov-navy);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-}
-
-/* INTERACTIVE HELPERS */
-.category-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.cat-btn {
-  background: white;
-  color: var(--gov-navy);
-  border: 1px solid var(--gov-navy);
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.cat-btn:hover {
-  background: var(--gov-navy);
-  color: white;
-}
-
-.auth-options {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.auth-btn {
-  background: var(--gov-navy);
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.rating-options {
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
-  justify-content: center;
-}
-
-.rating-btn {
-  background: white;
-  border: 1px solid #1a4f9c;
-  color: #1a4f9c;
-  padding: 8px 15px;
-  border-radius: 20px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.rating-btn:hover {
-  background: #1a4f9c;
-  color: white;
-  transform: scale(1.1);
-}
-
+@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

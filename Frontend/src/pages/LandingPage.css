@@ -1,0 +1,558 @@
+:root {
+  --primary-gov: #003366;
+  --secondary-gov: #c1d0e6;
+  --accent-gold: #f4b41a;
+  --text-dark: #1e293b;
+  --text-light: #f8fafc;
+  --bg-gray: #f1f5f9;
+}
+
+.landing-page {
+  font-family: 'Inter', sans-serif;
+  color: var(--text-dark);
+  background-color: var(--bg-gray);
+  overflow-x: hidden;
+}
+
+/* Navbar */
+.landing-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 3rem;
+  background-color: var(--primary-gov);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.gov-emblem {
+  width: 40px;
+  height: auto;
+}
+
+.navbar-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.gov-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-gold);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.portal-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: var(--accent-gold);
+}
+
+.nav-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+}
+
+.admin-btn {
+  background-color: transparent;
+  border: 1px solid white;
+  color: white;
+}
+
+.admin-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.worker-btn {
+  background-color: var(--accent-gold);
+  color: var(--primary-gov);
+}
+
+.worker-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+  height: 70vh;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(135deg, var(--primary-gov), var(--secondary-gov));
+  color: white;
+  padding: 0 2rem;
+}
+
+/* Hero Map Graphic BG */
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('/image-1.png') center/cover no-repeat;
+  opacity: 0.3;
+  mix-blend-mode: overlay;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  max-width: 800px;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin-bottom: 2.5rem;
+  opacity: 0.9;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.btn-primary {
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  background-color: var(--accent-gold);
+  color: var(--primary-gov);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(244, 180, 26, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(244, 180, 26, 0.6);
+}
+
+.btn-secondary {
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: white;
+  border: 2px solid white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: white;
+  color: var(--primary-gov);
+}
+
+/* Sections General */
+.section-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--primary-gov);
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 4px;
+  background-color: var(--accent-gold);
+  margin: 1rem auto 0;
+  border-radius: 2px;
+}
+
+/* Features Section */
+.features-section {
+  padding: 5rem 3rem;
+  background-color: white;
+}
+
+.features-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background-color: var(--bg-gray);
+  border-radius: 12px;
+  padding: 2rem;
+  width: calc(33.333% - 2rem);
+  min-width: 280px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-bottom: 4px solid var(--accent-gold);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  color: var(--secondary-gov);
+  margin-bottom: 1.5rem;
+  background: rgba(26, 79, 156, 0.1);
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.feature-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--primary-gov);
+}
+
+.feature-card p {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+/* Workflow Section */
+.workflow-section {
+  padding: 5rem 3rem;
+  background-color: var(--bg-gray);
+}
+
+.workflow-timeline {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.workflow-step {
+  background: white;
+  padding: 2rem 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  flex: 1;
+  min-width: 150px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  position: relative;
+  transition: transform 0.3s;
+}
+
+.workflow-step:hover {
+  transform: translateY(-5px);
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  background-color: var(--primary-gov);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 auto 1rem;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px var(--accent-gold);
+}
+
+.workflow-step h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-gov);
+  margin-bottom: 0.5rem;
+}
+
+.workflow-step p {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.workflow-arrow {
+  font-size: 2rem;
+  color: #cbd5e1;
+  font-weight: bold;
+}
+
+/* Analytics Section */
+.analytics-section {
+  padding: 5rem 3rem;
+  background-color: white;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, var(--primary-gov), var(--secondary-gov));
+  color: white;
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 10px 20px rgba(0, 51, 102, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.stat-value {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--accent-gold);
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 1.1rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+/* Footer Section */
+.landing-footer {
+  background-color: var(--text-dark);
+  color: white;
+  padding: 3rem;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 2rem;
+}
+
+.footer-brand h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+  margin-bottom: 0.5rem;
+}
+
+.footer-brand p {
+  color: #94a3b8;
+  max-width: 400px;
+}
+
+.footer-links p {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* Floating Bot */
+.floating-bot-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 999;
+}
+
+.floating-bot-btn {
+  background-color: var(--accent-gold);
+  color: var(--primary-gov);
+  border: none;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s;
+}
+
+.floating-bot-btn:hover {
+  transform: scale(1.1);
+}
+
+.floating-bot-window {
+  width: 420px;
+  height: 650px;
+  max-height: 85vh;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+}
+
+.bot-window-header {
+  background: var(--primary-gov);
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.close-bot-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.close-bot-btn:hover {
+  color: var(--accent-gold);
+}
+
+.bot-window-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Overriding CitizenBot styles when embedded */
+.bot-window-content .bot-page {
+  height: 100% !important;
+  border-radius: 0;
+}
+
+.bot-window-content .bot-header {
+  display: none;
+}
+
+.bot-window-content .chat-container {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  flex: 1;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .feature-card {
+    width: 100%;
+  }
+
+  .workflow-timeline {
+    flex-direction: column;
+  }
+
+  .workflow-arrow {
+    transform: rotate(90deg);
+    margin: 0.5rem 0;
+  }
+
+  .floating-bot-window {
+    width: calc(100vw - 2rem);
+    height: 80vh;
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .navbar-right {
+    display: none;
+  }
+
+  .landing-navbar {
+    padding: 1rem;
+  }
+}
