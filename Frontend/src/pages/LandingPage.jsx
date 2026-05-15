@@ -52,8 +52,8 @@ const LandingPage = () => {
       <section className="hero-section">
         <div className="hero-overlay" style={{ backgroundImage: `url('/image-1.png')` }}></div>
         <div className="hero-content">
-          <h1 className="hero-title">AI-Powered Smart Grievance & Municipal Task Allocation Platform</h1>
-          <p className="hero-subtitle">Improving complaint resolution efficiency using AI-driven prioritization and workforce optimization.</p>
+          <h1 className="hero-title">Smart Grievance & Municipal Task Allocation Platform</h1>
+          <p className="hero-subtitle">Improving complaint resolution efficiency using intelligent prioritization and workforce optimization.</p>
           <div className="hero-buttons">
             <button className="btn-primary" onClick={handleReportClick}>Report Complaint</button>
             <button className="btn-secondary" onClick={() => navigate('/admin')}>View Dashboard</button>
@@ -67,8 +67,8 @@ const LandingPage = () => {
         <div className="features-grid">
           <div className="feature-card">
             <div className="feature-icon"><FiActivity /></div>
-            <h3>AI Complaint Prioritization</h3>
-            <p>Automatically categorizes and assigns priority based on urgency using advanced machine learning models.</p>
+            <h3>Automated Priority Assessment</h3>
+            <p>Automatically categorizes and assigns priority based on urgency using advanced analytical models.</p>
           </div>
           <div className="feature-card">
             <div className="feature-icon"><FiMapPin /></div>

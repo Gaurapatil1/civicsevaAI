@@ -103,6 +103,7 @@ async def seed_data():
         demo_users = [
             { "name": "Ketan Patil", "email": "ketanpatil@gmail.com", "password": "1234", "role": "admin", "city": "Mumbai" },
             { "name": "Kiran Patil", "email": "kiranpatil@gmail.com", "password": "1234", "role": "worker", "dept": "Water Supply", "city": "Mumbai" },
+            { "name": "Rohit Joshi", "email": "rohit.joshi@municipal.gov", "password": "1234", "role": "worker", "dept": "Electricity", "city": "Mumbai" },
             { "name": "Amit Pawar", "email": "amit.pawar@gmail.com", "password": "1234", "role": "citizen" },
             { "name": "Sonal Mehta", "email": "sonal.mehta@gmail.com", "password": "1234", "role": "citizen" },
             { "name": "Vikram Singh", "email": "vikram.singh@gmail.com", "password": "1234", "role": "citizen" },
@@ -129,6 +130,21 @@ async def seed_data():
             "total_completed": 0
         }
         await db.db.workers.update_one({"email": kiran_worker["email"]}, {"$set": kiran_worker}, upsert=True)
+        
+        rohit_worker = {
+            "worker_id": "demo_worker_rohit",
+            "name": "Rohit Joshi",
+            "email": "rohit.joshi@municipal.gov",
+            "role": "worker",
+            "dept": "Electricity",
+            "password": "1234",
+            "status": "Available",
+            "active_tasks": 1,
+            "avg_rating": 4.5,
+            "avg_resolution_hours": 3,
+            "total_completed": 5
+        }
+        await db.db.workers.update_one({"email": rohit_worker["email"]}, {"$set": rohit_worker}, upsert=True)
         
         print("✅ Core demo accounts verified and ready.")
         
@@ -231,6 +247,32 @@ async def seed_data():
                     "completion_note": "Pipe repaired with heavy duty sealant and pressure verified.",
                     "completion_image": "https://images.unsplash.com/photo-1542013936693-884638324262?q=80&w=600",
                     "rating": 5
+                },
+                {
+                    "_id": str(uuid.uuid4()),
+                    "citizen_name": "Deepak More",
+                    "city": "Mumbai",
+                    "message": "Street light has been flickering and then stopped working in Bandra West.",
+                    "category": "Electricity",
+                    "priority": "Medium",
+                    "status": "In Progress",
+                    "assigned_worker": { "worker_id": "demo_worker_rohit", "name": "Rohit Joshi", "department": "Electricity" },
+                    "created_at": datetime.utcnow(),
+                    "completion_image": None,
+                    "rating": None
+                },
+                {
+                    "_id": str(uuid.uuid4()),
+                    "citizen_name": "Megha Jadhav",
+                    "city": "Mumbai",
+                    "message": "Frequent illegal waste dumping in the colony park area.",
+                    "category": "Waste Management",
+                    "priority": "Low",
+                    "status": "Pending",
+                    "assigned_worker": None,
+                    "created_at": datetime.utcnow(),
+                    "completion_image": None,
+                    "rating": None
                 },
             ]
             # 4. ALWAYS ensure core demo tasks exist (Upsert by message/name)

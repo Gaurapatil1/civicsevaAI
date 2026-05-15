@@ -127,7 +127,7 @@ const AdminDashboard = () => {
         <div className="sidebar-header">
           <img src="/image-10.png" alt="Gov Logo" className="admin-sidebar-logo" />
           <div className="logo-text">
-            <h3>CivicSeva AI</h3>
+            <h3>CivicSeva</h3>
             <p>Administration Portal</p>
           </div>
         </div>
@@ -144,7 +144,7 @@ const AdminDashboard = () => {
             <FiUsers /> <span>Field Operatives</span>
           </div>
           <div className={`nav-item ${activeTab === 'Analytics' ? 'active' : ''}`} onClick={() => setActiveTab('Analytics')}>
-            <FiBarChart2 /> <span>Strategic Intel</span>
+            <FiBarChart2 /> <span>Performance Metrics</span>
           </div>
           
           <div className="nav-item logout-nav" onClick={handleLogout} style={{marginTop: 'auto'}}>

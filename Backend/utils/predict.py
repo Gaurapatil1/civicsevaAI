@@ -3,7 +3,7 @@ import os
 import re
 
 # ==========================================
-# AI PREDICTION SERVICE (Prompt 7)
+# AUTOMATED CLASSIFICATION SERVICE
 # ==========================================
 
 # Path to the saved models
@@ -14,7 +14,7 @@ try:
     category_model = joblib.load(os.path.join(MODELS_DIR, "category_model.pkl"))
     priority_model = joblib.load(os.path.join(MODELS_DIR, "priority_model.pkl"))
     vectorizer = joblib.load(os.path.join(MODELS_DIR, "vectorizer.pkl"))
-    print("AI Models loaded successfully.")
+    print("Classification models loaded successfully.")
 except Exception as e:
     print(f"Error loading models: {e}. Please run train_models.py first.")
     category_model, priority_model, vectorizer = None, None, None

@@ -259,7 +259,7 @@ const CitizenBot = () => {
         setTempData(prev => ({ ...prev, complaint_text: text, pred_category: finalCategory, pred_priority: pred.priority }));
         setMessages(prev => [...prev, { 
           id: Date.now()+1, 
-          text: `📊 AI Analysis:\nCategory: ${finalCategory}\nPriority: ${pred.priority}\n\nShall I submit this grievance?`, 
+          text: `📋 Assessment Overview:\nCategory: ${finalCategory}\nPriority: ${pred.priority}\n\nShall I proceed with submitting this request?`, 
           sender: 'bot', 
           time: new Date().toLocaleTimeString() 
         }]);
@@ -386,7 +386,7 @@ const CitizenBot = () => {
               </div>
             </div>
           ))}
-          {loading && <div className="typing-indicator">AI Assistant is thinking...</div>}
+          {loading && <div className="typing-indicator">Municipal Assistant is searching...</div>}
           <div ref={scrollRef} />
         </div>
 
