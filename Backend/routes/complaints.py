@@ -34,72 +34,72 @@ async def submit_complaint(complaint: ComplaintCreate):
     5. Return the full complaint details.
     """
     
-    # 1. Check if database is initialized
-    if db.db is None:
-        raise HTTPException(status_code=500, detail="Database not connected.")
-
-    # 2. AI Category and Priority Prediction
-    pred_cat, priority = predict_category_and_priority(complaint.message)
-    category = complaint.category if complaint.category else pred_cat
-    
-    print(f"AI Prediction: Category={pred_cat}, Priority={priority}")
-
-    # 3. Worker Allocation
-    # Finds the worker with the lowest workload in the predicted category
-    worker = await find_best_worker(category)
-    
-    worker_data = None
-    if worker:
-        # Extract only necessary worker info for the response
-        worker_data = {
-            "worker_id": worker["worker_id"],
-            "name": worker["name"],
-            "department": worker["department"],
-            "designation": worker.get("designation")
-        }
-        print(f"Allocated Worker: {worker['name']} ({worker.get('designation')})")
-
-    # 4. Create record for MongoDB
-    complaint_id = str(uuid.uuid4())
-    complaint_record = {
-        "_id": complaint_id,
-        "citizen_name": complaint.citizen_name,
-        "city": complaint.city,
-        "message": complaint.message,
-        "category": category,
-        "priority": priority,
-        "assigned_worker": worker_data,
-        "status": "Pending",
-        "created_at": datetime.utcnow()
-    }
-
-    # 5. Insert into MongoDB
     try:
+        # 1. Check if database is initialized
+        if db.db is None:
+            raise HTTPException(status_code=500, detail="Database not connected.")
+
+        # 2. AI Category and Priority Prediction
+        pred_cat, priority = predict_category_and_priority(complaint.message)
+        category = complaint.category if complaint.category else pred_cat
+        
+        # Ensure native python strings to prevent NumPy BSON encoding crashes
+        category = str(category)
+        priority = str(priority)
+        
+        print(f"AI Prediction: Category={category}, Priority={priority}")
+
+        # 3. Worker Allocation
+        worker = await find_best_worker(db.db, category, priority)
+        
+        worker_data = None
+        if worker:
+            worker_data = {
+                "worker_id": str(worker.get("worker_id", worker["_id"])),
+                "name": str(worker["name"]),
+                "department": str(worker["dept"]),
+                "designation": str(worker.get("role", "worker"))
+            }
+
+        # 4. Create record for MongoDB
+        complaint_id = str(uuid.uuid4())
+        complaint_record = {
+            "_id": complaint_id,
+            "citizen_name": complaint.citizen_name,
+            "city": complaint.city,
+            "message": complaint.message,
+            "category": category,
+            "priority": priority,
+            "assigned_worker": worker_data,
+            "status": "Pending",
+            "created_at": datetime.utcnow()
+        }
+
+        # 5. Insert into MongoDB
         await db.db.complaints.insert_one(complaint_record)
         
-        # 5.1 Increment worker task count for real-time allocation data
         if worker_data:
             await db.db.workers.update_one(
-                {"worker_id": worker_data["worker_id"]},
+                {"_id": worker["_id"]},
                 {"$inc": {"active_tasks": 1}}
             )
-            print(f"Update: Incremented active_tasks for {worker_data['name']}")
-            
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database insertion failed: {e}")
 
-    # 6. Format and return response
-    return {
-        "id": complaint_id,
-        "citizen_name": complaint.citizen_name,
-        "city": complaint.city,
-        "message": complaint.message,
-        "category": category,
-        "priority": priority,
-        "assigned_worker": worker_data,
-        "status": complaint_record["status"],
-        "created_at": complaint_record["created_at"]
-    }
+        return {
+            "id": complaint_id,
+            "citizen_name": complaint.citizen_name,
+            "city": complaint.city,
+            "message": complaint.message,
+            "category": category,
+            "priority": priority,
+            "assigned_worker": worker_data,
+            "status": "Pending",
+            "created_at": complaint_record["created_at"]
+        }
+    except Exception as e:
+        import traceback
+        err_msg = traceback.format_exc()
+        print(err_msg)
+        raise HTTPException(status_code=500, detail=str(err_msg))
 
 # NEW WORKFLOW ENDPOINTS
 

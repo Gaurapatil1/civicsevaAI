@@ -14,10 +14,7 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (captcha.toUpperCase() !== '6FGMN') {
-      setError('Invalid CAPTCHA code.');
-      return;
-    }
+    e.preventDefault();
     setLoading(true);
     setError('');
 
@@ -30,7 +27,8 @@ const Login = () => {
       if (data.user.role === 'admin') {
         navigate('/admin');
       } else {
-        navigate('/worker-dashboard');
+        setError('Access denied. Please use the Field Operative Portal for worker login.');
+        setLoading(false);
       }
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
@@ -73,62 +71,43 @@ const Login = () => {
       <div className="main-content">
         <div className="login-card-container fade-in">
           <div className="login-form-side">
-            <h1 className="login-title">Admin Login</h1>
-            <div className="underline-red"></div>
+            <h1 className="login-title">WELCOME</h1>
 
             {error && <div className="error-banner">{error}</div>}
 
             <form onSubmit={handleLogin} className="gov-form">
               <div className="gov-form-group">
-                <label>USERNAME / EMAIL / MOBILE NO <span className="req">*</span></label>
-                <div className="input-with-icon">
-                  <FaUser className="input-icon" />
-                  <input 
-                    type="text" 
-                    placeholder="Enter your identifier"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required 
-                  />
-                </div>
+                <label>Username</label>
+                <input 
+                  type="text" 
+                  placeholder="xxxxxxxxxxxxxxxx"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required 
+                />
               </div>
 
               <div className="gov-form-group">
-                <label>PASSWORD <span className="req">*</span></label>
-                <div className="input-with-icon">
-                  <FaLock className="input-icon" />
-                  <input 
-                    type="password" 
-                    placeholder="Enter password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required 
-                  />
-                </div>
+                <label>Password</label>
+                <input 
+                  type="password" 
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required 
+                />
               </div>
 
-              <div className="gov-form-group">
-                <label>CAPTCHA <span className="req">*</span></label>
-                <div className="captcha-container">
-                  <input 
-                    type="text" 
-                    placeholder="Enter code"
-                    value={captcha}
-                    onChange={(e) => setCaptcha(e.target.value)}
-                    required 
-                  />
-                  <div className="captcha-display">
-                    6FGMN
-                  </div>
-                </div>
+              <div className="form-options">
+                <label>
+                  <input type="checkbox" /> Remember
+                </label>
+                <a href="#" className="forgot-link">Forgot Password ?</a>
               </div>
 
-              <div className="form-actions">
-                <button type="submit" className="btn-gov-login" disabled={loading}>
-                  {loading ? 'WAIT...' : 'LOGIN'}
-                </button>
-                <button type="button" className="btn-gov-forgot">Forgot Password?</button>
-              </div>
+              <button type="submit" className="btn-gov-login" disabled={loading}>
+                {loading ? 'WAIT...' : 'SUBMIT'}
+              </button>
             </form>
             
             <div className="auth-footer-links">
@@ -137,14 +116,7 @@ const Login = () => {
           </div>
 
           <div className="login-info-side">
-             <h2>Operational Command & Management Console</h2>
-             <p>Access the unified dashboard to monitor city-wide grievances, manage field staff, and ensure rapid resolution of civic issues using AI-driven allocation.</p>
-             
-             <ul className="info-points">
-                <li><FaCheckCircle className="check-icon" /> Real-time Grievance Monitoring</li>
-                <li><FaCheckCircle className="check-icon" /> Field Staff Load Management</li>
-                <li><FaCheckCircle className="check-icon" /> AI-Augmented Decision Support</li>
-             </ul>
+             <img src="/admin.png" alt="Admin Vector Illustration" />
           </div>
         </div>
       </div>

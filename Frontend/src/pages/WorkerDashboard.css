@@ -3,10 +3,32 @@
 */
 
 .worker-app {
-  background: #0f172a; /* Dark theme for field focus */
-  color: #f1f5f9;
-  min-height: 100vh;
+  display: flex;
+  height: 100vh;
+  background: #f8fafc; /* Light theme for readability */
+  color: #1e293b;
   font-family: 'Inter', sans-serif;
+  overflow: hidden;
+}
+
+/* Fix sidebar text visibility on dark blue background */
+.worker-app .nav-item {
+  color: #e2e8f0; 
+  opacity: 0.85;
+}
+
+.worker-app .nav-item.active {
+  color: #003366; /* Deep blue text for white active bg */
+  opacity: 1;
+}
+
+.worker-app .nav-item:hover {
+  color: #003366;
+  opacity: 1;
+}
+
+.worker-app .logo-text p {
+  color: #cbd5e1;
 }
 
 .worker-header {

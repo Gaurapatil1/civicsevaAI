@@ -53,8 +53,8 @@ async def register_user(user: UserRegistration):
     
     try:
         # Step 1: Check if user already exists based on email
-        # Requirement: Check MongoDB users collection properly
-        existing_user = await db.db.users.find_one({"email": user.email})
+        email_regex = {"$regex": f"^{user.email}$", "$options": "i"}
+        existing_user = await db.db.users.find_one({"email": email_regex})
         
         if existing_user:
             logger.warning(f"Duplicate email detected: {user.email}")
@@ -113,10 +113,16 @@ async def login_user(user: UserLogin):
     if db.db is None:
         raise HTTPException(status_code=500, detail="Database not connected.")
     
-    # Find user by email
-    found_user = await db.db.users.find_one({"email": user.email})
+    # Find user by email case-insensitively
+    email_regex = {"$regex": f"^{user.email}$", "$options": "i"}
+    found_user = await db.db.users.find_one({"email": email_regex})
+    is_worker_db = False
     
-    # Requirement: Verify password hash (must handle both plain and hashed for migration safety if needed, but here we assume bcrypt)
+    if not found_user:
+        # Also check the workers collection natively
+        found_user = await db.db.workers.find_one({"email": email_regex})
+        is_worker_db = True
+
     if not found_user:
         logger.warning(f"Login failed: User {user.email} not found")
         raise HTTPException(status_code=401, detail="Invalid email or password.")
@@ -139,14 +145,19 @@ async def login_user(user: UserLogin):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
     
     logger.info(f"User {user.email} logged in successfully.")
+    
+    role = found_user.get("role", "citizen")
+    if is_worker_db:
+        role = "worker"
+        
     return {
         "message": "Login successful",
         "user": {
             "name": found_user["name"],
             "email": found_user["email"],
             "phone": found_user.get("phone", "N/A"),
-            "role": found_user.get("role", "citizen"),
-            "city": found_user.get("city", "N/A")
+            "role": role,
+            "city": found_user.get("city", "Mumbai")
         },
         "token": "fake-jwt-token-for-demo"
     }

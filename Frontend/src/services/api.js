@@ -50,4 +50,30 @@ export const submitFeedback = async (complaintId, rating, feedback) => {
   return response.data;
 };
 
+export const workerLogin = async (email, password) => {
+  const response = await api.post('/worker/login', { email, password });
+  return response.data;
+};
+
+export const getWorkerTasks = async (email) => {
+  const response = await api.get(`/worker/tasks?email=${email}`);
+  return response.data;
+};
+
+export const uploadWorkerImage = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post('/worker/upload-image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return response.data;
+};
+
+export const updateWorkerTask = async (complaint_id, status, completion_note, completion_image) => {
+  const response = await api.put('/worker/update-task', {
+    complaint_id, status, completion_note, completion_image
+  });
+  return response.data;
+};
+
 export default api;

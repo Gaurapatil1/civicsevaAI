@@ -1,14 +1,20 @@
+# Auto-reload trigger
 import os
 import random
 import pandas as pd
 from datetime import datetime
 from motor.motor_asyncio import AsyncIOMotorClient
+try:
+    from mongomock_motor import AsyncMongoMockClient
+except ImportError:
+    AsyncMongoMockClient = None
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Configuration
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+USE_MOCK_DB = os.getenv("USE_MOCK_DB", "true").lower() == "true"
 DB_NAME = "civicseva_db"
 
 class Database:
@@ -19,9 +25,14 @@ class Database:
 db = Database()
 
 async def connect_to_mongo():
-    db.client = AsyncIOMotorClient(MONGO_URI)
+    if USE_MOCK_DB and AsyncMongoMockClient:
+        db.client = AsyncMongoMockClient()
+        print("✅ Connected to MOCK MongoDB.")
+    else:
+        db.client = AsyncIOMotorClient(MONGO_URI)
+        print(f"✅ Connected to MongoDB: {MONGO_URI}")
+    
     db.db = db.client[DB_NAME]
-    print(f"✅ Connected to MongoDB: {MONGO_URI}")
 
 async def close_mongo_connection():
     if db.client:
@@ -68,23 +79,39 @@ async def seed_data():
                     "total_completed": random.randint(10, 100)
                 })
             
+            
             if workers_list:
                 await db.db.workers.insert_many(workers_list[:40])
                 print(f"✅ Seeded {len(workers_list[:40])} workers from employees dataset.")
 
+            # Explicitly add our specific demo worker so the AI allocator can find them
+            await db.db.workers.insert_one({
+                "worker_id": "demo_worker_kiran",
+                "name": "Kiran Patil",
+                "email": "kiranpatil@gmail.com",
+                "role": "worker",
+                "dept": "Water Supply",
+                "password": "1234",
+                "status": "Available",
+                "active_tasks": 0,
+                "avg_rating": 4.9,
+                "avg_resolution_hours": 1,
+                "total_completed": 0
+            })
+
         # 3. Seed Admin and Test Worker Account
         await db.db.users.insert_many([
             {
-                "name": "Chief Administrator",
-                "email": "admin@civicseva.gov",
-                "password": "123", # For demo simplicity
+                "name": "Ketan Patil",
+                "email": "ketanpatil@gmail.com",
+                "password": "1234",
                 "role": "admin",
                 "city": "Mumbai"
             },
             {
-                "name": "Amit Pawar",
-                "email": "amit.pawar@municipal.gov",
-                "password": "123",
+                "name": "Kiran Patil",
+                "email": "kiranpatil@gmail.com",
+                "password": "1234",
                 "role": "worker",
                 "dept": "Water Supply",
                 "city": "Mumbai"

@@ -6,7 +6,8 @@ from database import connect_to_mongo, close_mongo_connection, seed_data
 # ==========================================
 
 # Import routers
-from routes import complaints, dashboard, auth
+from routes import complaints, dashboard, auth, worker
+from fastapi.staticfiles import StaticFiles
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -19,11 +20,16 @@ app = FastAPI(
 # Enable CORS for Frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # For development, allow everything; could be restricted to ["http://localhost:5173"]
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+import os
+UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 # Startup event to initialize database connection
 @app.on_event("startup")
@@ -40,6 +46,7 @@ async def shutdown_db_client():
 app.include_router(auth.router)
 app.include_router(complaints.router)
 app.include_router(dashboard.router)
+app.include_router(worker.router)
 
 # Root endpoint for health check
 @app.get("/")

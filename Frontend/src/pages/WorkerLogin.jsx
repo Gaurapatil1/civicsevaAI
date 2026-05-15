@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../services/api';
+import { workerLogin } from '../services/api';
 import './Auth.css';
 import { FaUser, FaLock, FaCheckCircle, FaSearch, FaSignOutAlt, FaHardHat } from 'react-icons/fa';
 
@@ -14,21 +14,13 @@ const WorkerLogin = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (captcha.toUpperCase() !== '6FGMN') {
-      setError('Invalid CAPTCHA code.');
-      return;
-    }
+    e.preventDefault();
+    setLoading(true);
     setLoading(true);
     setError('');
 
     try {
-      const data = await login(email, password);
-      // Extra check: only let workers log in here
-      if (data.user.role !== 'worker' && data.user.role !== 'admin') {
-         setError('Access denied. Field Operative authorization required.');
-         setLoading(false);
-         return;
-      }
+      const data = await workerLogin(email, password);
       
       localStorage.setItem('user', JSON.stringify(data.user));
       localStorage.setItem('token', data.token);
@@ -68,75 +60,50 @@ const WorkerLogin = () => {
       </nav>
 
       <div className="main-content">
-        <div className="login-card-container fade-in" style={{ borderColor: '#10b981' }}>
+        <div className="login-card-container fade-in">
           <div className="login-form-side">
-            <h1 className="login-title" style={{ color: '#047857' }}><FaHardHat style={{marginRight: '10px'}}/>Field Operative Login</h1>
-            <div className="underline-red" style={{ backgroundColor: '#10b981' }}></div>
+            <h1 className="login-title">WELCOME</h1>
 
             {error && <div className="error-banner">{error}</div>}
 
             <form onSubmit={handleLogin} className="gov-form">
               <div className="gov-form-group">
-                <label>WORKER ID / EMAIL <span className="req">*</span></label>
-                <div className="input-with-icon">
-                  <FaUser className="input-icon" />
-                  <input 
-                    type="text" 
-                    placeholder="Enter your identifier"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required 
-                  />
-                </div>
+                <label>Username</label>
+                <input 
+                  type="text" 
+                  placeholder="xxxxxxxxxxxxxxxx"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required 
+                />
               </div>
 
               <div className="gov-form-group">
-                <label>PASSWORD <span className="req">*</span></label>
-                <div className="input-with-icon">
-                  <FaLock className="input-icon" />
-                  <input 
-                    type="password" 
-                    placeholder="Enter password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required 
-                  />
-                </div>
+                <label>Password</label>
+                <input 
+                  type="password" 
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required 
+                />
               </div>
 
-              <div className="gov-form-group">
-                <label>CAPTCHA <span className="req">*</span></label>
-                <div className="captcha-container">
-                  <input 
-                    type="text" 
-                    placeholder="Enter code"
-                    value={captcha}
-                    onChange={(e) => setCaptcha(e.target.value)}
-                    required 
-                  />
-                  <div className="captcha-display" style={{ backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #10b981' }}>
-                    6FGMN
-                  </div>
-                </div>
+              <div className="form-options">
+                <label>
+                  <input type="checkbox" /> Remember
+                </label>
+                <a href="#" className="forgot-link">Forgot Password ?</a>
               </div>
 
-              <div className="form-actions">
-                <button type="submit" className="btn-gov-login" disabled={loading} style={{ backgroundColor: '#059669' }}>
-                  {loading ? 'AUTHENTICATING...' : 'SECURE LOGIN'}
-                </button>
-              </div>
+              <button type="submit" className="btn-gov-login" disabled={loading}>
+                {loading ? 'WAIT...' : 'SUBMIT'}
+              </button>
             </form>
           </div>
 
-          <div className="login-info-side" style={{ background: 'linear-gradient(135deg, #064e3b 0%, #047857 100%)' }}>
-             <h2>On-Ground Operations Portal</h2>
-             <p>Access your allocated tasks, verify resolutions securely via AI, and ensure faster grievance remediation on the field.</p>
-             
-             <ul className="info-points">
-                <li><FaCheckCircle className="check-icon" style={{color: '#34d399'}}/> View AI-Assigned Tasks</li>
-                <li><FaCheckCircle className="check-icon" style={{color: '#34d399'}}/> Upload GPS-Tagged Evidences</li>
-                <li><FaCheckCircle className="check-icon" style={{color: '#34d399'}}/> Close Grievances on Site</li>
-             </ul>
+          <div className="login-info-side">
+             <img src="/worker.png" alt="Worker Vector Illustration" />
           </div>
         </div>
       </div>

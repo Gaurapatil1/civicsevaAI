@@ -27,7 +27,7 @@ const LandingPage = () => {
           <button className="nav-link" onClick={() => window.scrollTo(0, 0)}>Home</button>
           <button className="nav-link" onClick={() => document.getElementById('about').scrollIntoView()}>About System</button>
           <button className="nav-btn admin-btn" onClick={() => navigate('/login')}>Admin Login</button>
-          <button className="nav-btn worker-btn" onClick={() => navigate('/login')}>Worker Dashboard</button>
+          <button className="nav-btn worker-btn" onClick={() => navigate('/worker-login')}>Worker Dashboard</button>
         </div>
       </nav>
 
