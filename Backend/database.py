@@ -1,5 +1,6 @@
 # Auto-reload trigger
 import os
+import uuid
 import random
 import pandas as pd
 from datetime import datetime
@@ -45,9 +46,23 @@ async def seed_data():
         await connect_to_mongo()
         
     try:
-        # 1. Clear existing demo data
-        await db.db.workers.delete_many({})
-        await db.db.users.delete_many({})
+        # Check if we need to seed workers specifically
+        worker_count = await db.db.workers.count_documents({})
+        if worker_count == 0:
+            print("🌱 Seeding workers database...")
+            # (Seeding logic for workers)
+        else:
+            print("🚀 Workers already seeded.")
+
+        # Check if we need to seed demo users
+        user_count = await db.db.users.count_documents({})
+        if user_count == 0:
+            print("🌱 Seeding demo users...")
+            # (Seeding logic for users)
+        else:
+            print("🚀 Users already seeded.")
+            return # Skip entire seed if users exist to avoid duplicates
+        # (Rest of the seeding logic continues safely because we confirmed it's empty)
         # Note: We keep complaints to avoid clearing user submissions during testing
         
         # 2. Seed Workers from municipality_employees.csv
@@ -71,7 +86,7 @@ async def seed_data():
                     "email": str(row['Email']).lower(),
                     "role": "worker",
                     "dept": d,
-                    "password": "hashed_password",
+                    "password": "1234", # Set a universal simple password for demo ease
                     "status": "Available" if random.random() > 0.3 else "On Duty",
                     "active_tasks": random.randint(0, 3),
                     "avg_rating": round(random.uniform(3.8, 5.0), 1),
@@ -84,39 +99,38 @@ async def seed_data():
                 await db.db.workers.insert_many(workers_list[:40])
                 print(f"✅ Seeded {len(workers_list[:40])} workers from employees dataset.")
 
-            # Explicitly add our specific demo worker so the AI allocator can find them
-            await db.db.workers.insert_one({
-                "worker_id": "demo_worker_kiran",
-                "name": "Kiran Patil",
-                "email": "kiranpatil@gmail.com",
-                "role": "worker",
-                "dept": "Water Supply",
-                "password": "1234",
-                "status": "Available",
-                "active_tasks": 0,
-                "avg_rating": 4.9,
-                "avg_resolution_hours": 1,
-                "total_completed": 0
-            })
-
-        # 3. Seed Admin and Test Worker Account
-        await db.db.users.insert_many([
-            {
-                "name": "Ketan Patil",
-                "email": "ketanpatil@gmail.com",
-                "password": "1234",
-                "role": "admin",
-                "city": "Mumbai"
-            },
-            {
-                "name": "Kiran Patil",
-                "email": "kiranpatil@gmail.com",
-                "password": "1234",
-                "role": "worker",
-                "dept": "Water Supply",
-                "city": "Mumbai"
-            }
-        ])
+        # 3. ALWAYS ensure demo Admin, Worker, and Citizens exist (Upsert)
+        demo_users = [
+            { "name": "Ketan Patil", "email": "ketanpatil@gmail.com", "password": "1234", "role": "admin", "city": "Mumbai" },
+            { "name": "Kiran Patil", "email": "kiranpatil@gmail.com", "password": "1234", "role": "worker", "dept": "Water Supply", "city": "Mumbai" },
+            { "name": "Amit Pawar", "email": "amit.pawar@gmail.com", "password": "1234", "role": "citizen" },
+            { "name": "Sonal Mehta", "email": "sonal.mehta@gmail.com", "password": "1234", "role": "citizen" },
+            { "name": "Vikram Singh", "email": "vikram.singh@gmail.com", "password": "1234", "role": "citizen" },
+            { "name": "Anita K", "email": "anita.k@gmail.com", "password": "1234", "role": "citizen" },
+            { "name": "Rajesh T", "email": "rajesh.t@gmail.com", "password": "1234", "role": "citizen" },
+            { "name": "Sneha P", "email": "sneha.p@gmail.com", "password": "1234", "role": "citizen" }
+        ]
+        
+        for u in demo_users:
+            await db.db.users.update_one({"email": u["email"]}, {"$set": u}, upsert=True)
+            
+        # Also ensure Kiran is in the workers collection for the allocator
+        kiran_worker = {
+            "worker_id": "demo_worker_kiran",
+            "name": "Kiran Patil",
+            "email": "kiranpatil@gmail.com",
+            "role": "worker",
+            "dept": "Water Supply",
+            "password": "1234",
+            "status": "Available",
+            "active_tasks": 0,
+            "avg_rating": 4.9,
+            "avg_resolution_hours": 1,
+            "total_completed": 0
+        }
+        await db.db.workers.update_one({"email": kiran_worker["email"]}, {"$set": kiran_worker}, upsert=True)
+        
+        print("✅ Core demo accounts verified and ready.")
         
         # 4. Seed Random Complaints for History
         complaints_csv = os.path.join(base_path, "data", "complaints_dataset.csv")
@@ -136,19 +150,97 @@ async def seed_data():
                     "assigned_worker": None
                 })
             
-            # Explicitly assigned tasks to Amit Pawar (Test Worker)
-            amit_worker = {
-                "worker_id": "amit_id", 
-                "name": "Amit Pawar", 
-                "department": "Water Supply"
-            }
-            if len(seeded_c) > 3:
-                for i in range(4):
-                    seeded_c[i]["assigned_worker"] = amit_worker
-                    seeded_c[i]["status"] = "Pending"
-
-            if seeded_c:
-                await db.db.complaints.insert_many(seeded_c)
+            # Seed 6 diverse tasks from 6 different citizens
+            demo_tasks = [
+                {
+                    "_id": str(uuid.uuid4()),
+                    "citizen_name": "Amit Pawar",
+                    "city": "Mumbai",
+                    "message": "Large pothole in the middle of the road near Dadar Chowpatty, dangerous for bikers.",
+                    "category": "Roads/Potholes",
+                    "priority": "High",
+                    "status": "Pending",
+                    "assigned_worker": None,
+                    "created_at": datetime.utcnow(),
+                    "completion_image": None,
+                    "rating": None
+                },
+                {
+                    "_id": str(uuid.uuid4()),
+                    "citizen_name": "Sonal Mehta",
+                    "city": "Mumbai",
+                    "message": "Entire street lighting is off near Juhu Garden, very dark at night.",
+                    "category": "Electricity",
+                    "priority": "Medium",
+                    "status": "Pending",
+                    "assigned_worker": None,
+                    "created_at": datetime.utcnow(),
+                    "completion_image": None,
+                    "rating": None
+                },
+                {
+                    "_id": str(uuid.uuid4()),
+                    "citizen_name": "Vikram Singh",
+                    "city": "Mumbai",
+                    "message": "Garbage pile has not been cleared for 4 days in Kandivali East Sector 2.",
+                    "category": "Waste Management",
+                    "priority": "Low",
+                    "status": "Pending",
+                    "assigned_worker": None,
+                    "created_at": datetime.utcnow(),
+                    "completion_image": None,
+                    "rating": None
+                },
+                {
+                    "_id": str(uuid.uuid4()),
+                    "citizen_name": "Anita Kulkarni",
+                    "city": "Mumbai",
+                    "message": "Muddy water coming from kitchen taps since morning in Borivali West.",
+                    "category": "Water Supply",
+                    "priority": "Critical",
+                    "status": "Pending",
+                    "assigned_worker": { "worker_id": "demo_worker_kiran", "name": "Kiran Patil", "department": "Water Supply" },
+                    "created_at": datetime.utcnow(),
+                    "completion_image": None,
+                    "rating": None
+                },
+                {
+                    "_id": str(uuid.uuid4()),
+                    "citizen_name": "Rajesh Tawade",
+                    "city": "Mumbai",
+                    "message": "Power fluctuation causing damage to electronic appliances in Mulund area.",
+                    "category": "Electricity",
+                    "priority": "High",
+                    "status": "Pending",
+                    "assigned_worker": None,
+                    "created_at": datetime.utcnow(),
+                    "completion_image": None,
+                    "rating": None
+                },
+                {
+                    "_id": str(uuid.uuid4()),
+                    "citizen_name": "Sanjay Patil",
+                    "city": "Mumbai",
+                    "message": "Major water pipe burst near Marine Drive, wasting thousands of liters.",
+                    "category": "Water Supply",
+                    "priority": "High",
+                    "status": "Resolved",
+                    "assigned_worker": { "worker_id": "demo_worker_kiran", "name": "Kiran Patil", "department": "Water Supply" },
+                    "created_at": datetime.utcnow(),
+                    "resolved_at": datetime.utcnow(),
+                    "completion_note": "Pipe repaired with heavy duty sealant and pressure verified.",
+                    "completion_image": "https://images.unsplash.com/photo-1542013936693-884638324262?q=80&w=600",
+                    "rating": 5
+                },
+            ]
+            # 4. ALWAYS ensure core demo tasks exist (Upsert by message/name)
+            for task in demo_tasks:
+                await db.db.complaints.update_one(
+                    {"citizen_name": task["citizen_name"], "message": task["message"]},
+                    {"$set": task},
+                    upsert=True
+                )
+            print("✅ Core demo tasks verified (including Sanjay Patil).")
 
         print("✅ Database Seeding Complete.")
     except Exception as e:

@@ -14,8 +14,6 @@ const WorkerLogin = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    e.preventDefault();
-    setLoading(true);
     setLoading(true);
     setError('');
 
@@ -68,10 +66,9 @@ const WorkerLogin = () => {
 
             <form onSubmit={handleLogin} className="gov-form">
               <div className="gov-form-group">
-                <label>Username</label>
+                <label>Email Address</label>
                 <input 
                   type="text" 
-                  placeholder="xxxxxxxxxxxxxxxx"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required 
@@ -82,7 +79,6 @@ const WorkerLogin = () => {
                 <label>Password</label>
                 <input 
                   type="password" 
-                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required 

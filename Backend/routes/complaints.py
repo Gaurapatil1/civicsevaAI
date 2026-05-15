@@ -12,6 +12,17 @@ import uuid
 
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
+@router.get("/reviews")
+async def get_citizen_reviews():
+    """Returns resolved complaints with citizen ratings for the landing page testimonials."""
+    if db.db is None:
+        return []
+    cursor = db.db.complaints.find({"status": "Resolved", "rating": {"$exists": True, "$ne": None}}).sort("rating", -1).limit(6)
+    reviews = await cursor.to_list(length=6)
+    for r in reviews:
+        r["_id"] = str(r["_id"])
+    return reviews
+
 @router.post("/predict")
 async def predict_complaint(complaint: ComplaintCreate):
     """
@@ -142,10 +153,30 @@ async def get_user_complaints(citizen_name: str):
     if db.db is None:
         raise HTTPException(status_code=500, detail="Database not connected.")
     
-    cursor = db.db.complaints.find({"citizen_name": citizen_name}).sort("created_at", -1).limit(5)
+    cursor = db.db.complaints.find({"citizen_name": {"$regex": citizen_name, "$options": "i"}}).sort("created_at", -1).limit(5)
     complaints = await cursor.to_list(length=5)
     for c in complaints:
-        c["id"] = c["_id"]
+        c["id"] = str(c["_id"])
+        c["_id"] = str(c["_id"])
+    return complaints
+
+@router.get("/user-email/{citizen_email}")
+async def get_user_complaints_by_email(citizen_email: str):
+    """Fetch complaints by citizen email - more accurate than name lookup."""
+    if db.db is None:
+        raise HTTPException(status_code=500, detail="Database not connected.")
+
+    # First resolve email → name via users collection
+    user = await db.db.users.find_one({"email": {"$regex": f"^{citizen_email}$", "$options": "i"}})
+    if not user:
+        return []
+
+    citizen_name = user["name"]
+    cursor = db.db.complaints.find({"citizen_name": {"$regex": citizen_name, "$options": "i"}}).sort("created_at", -1).limit(5)
+    complaints = await cursor.to_list(length=5)
+    for c in complaints:
+        c["id"] = str(c["_id"])
+        c["_id"] = str(c["_id"])
     return complaints
 
 @router.get("/{complaint_id}")

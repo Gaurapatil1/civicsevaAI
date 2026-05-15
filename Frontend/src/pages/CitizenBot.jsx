@@ -18,19 +18,26 @@ const CitizenBot = () => {
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
+    if (messages.length > 1) return; // Prevent double greeting in dynamic re-renders
+    
     if (savedUser && savedUser !== 'undefined') {
       try {
         const parsed = JSON.parse(savedUser);
         setUser(parsed);
-        setConvState('CHAT');
-        setMessages(prev => [...prev, { id: Date.now(), text: `Welcome back, ${parsed.name}. Please describe the municipal issue you'd like to report.`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
+        setConvState('AWAITING_AUTH_CHOICE'); 
+        setMessages(prev => [...prev, { 
+          id: Date.now(), 
+          text: `Welcome back, ${parsed.name}! How would you like to proceed today?`, 
+          sender: 'bot', 
+          time: new Date().toLocaleTimeString() 
+        }]);
       } catch (e) {
         console.error("Error parsing user", e);
       }
     } else {
       setMessages(prev => [...prev, { 
         id: Date.now(), 
-        text: "To provide personalized assistance, would you like to Log In or Register as a guest?", 
+        text: "Please select an option to continue:", 
         sender: 'bot', 
         time: new Date().toLocaleTimeString() 
       }]);
@@ -92,83 +99,167 @@ const CitizenBot = () => {
 
     try {
       if (convState === 'AWAITING_AUTH_CHOICE') {
-        if (text.toLowerCase().includes('status')) {
-          setConvState('AWAITING_LOGIN_FOR_STATUS');
-          setMessages(prev => [...prev, { id: Date.now()+1, text: "For security, please log in with your registered email to view your grievance history.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+        const input = text.toLowerCase();
+        if (input.includes('status')) {
+          const checkEmail = user ? user.email : null;
+          if (checkEmail) {
+            const res = await api.get(`/complaints/user-email/${encodeURIComponent(checkEmail.trim().toLowerCase())}`);
+            const complaints = res.data;
+            if (complaints.length === 0) {
+              setMessages(prev => [...prev, { id: Date.now()+1, text: "No active grievances found for your account.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+              setConvState('AWAITING_ISSUE_TYPE');
+            } else {
+              const c = complaints[0]; // Latest one
+              setTempData(prev => ({ ...prev, current_complaint_id: c._id || c.id }));
+              let msgText = `📋 Your Latest Grievance:\nRef ID: #${(c._id || c.id).slice(-6).toUpperCase()}\nStatus: ${c.status}\nCategory: ${c.category}\nPriority: ${c.priority}\nWorker: ${c.assigned_worker ? c.assigned_worker.name : 'Pending Assignment'}`;
+              
+              if (c.status === 'Resolved' && !c.rating) {
+                setMessages(prev => [...prev, {
+                  id: Date.now()+1,
+                  text: msgText + `\n\n✅ Task marked Resolved by ${c.assigned_worker?.name || 'worker'}.\nProof image attached below.\n\nAre you satisfied?\nClick Yes to Close or No to Reopen.`,
+                  image: (c.completion_image && c.completion_image !== 'repair_site.jpg') ? c.completion_image : null,
+                  sender: 'bot',
+                  time: new Date().toLocaleTimeString()
+                }]);
+                setConvState('AWAITING_CLOSURE_CONFIRM');
+              } else {
+                setMessages(prev => [...prev, {
+                  id: Date.now()+1,
+                  text: msgText + (c.rating ? `\n\n⭐ Your Rating: ${c.rating}/5` : "\n\nPlease wait for our worker to arrive at the site."),
+                  image: (c.completion_image && c.completion_image !== 'repair_site.jpg') ? c.completion_image : null,
+                  sender: 'bot',
+                  time: new Date().toLocaleTimeString()
+                }]);
+                setConvState('AWAITING_ISSUE_TYPE');
+              }
+            }
+          } else {
+            setConvState('AWAITING_LOGIN_FOR_STATUS');
+            setMessages(prev => [...prev, { id: Date.now()+1, text: "For security, please log in with your registered email to view your grievance history.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+          }
         }
-        else if (text.toLowerCase().includes('log')) {
-          setConvState('AWAITING_LOGIN');
-          setMessages(prev => [...prev, { id: Date.now()+1, text: "Please enter your registered email.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
-        } else {
-          setConvState('AWAITING_REGISTER');
-          setMessages(prev => [...prev, { id: Date.now()+1, text: "Please enter your name for guest registration.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+        else if (input.includes('report') || input.includes('issue')) {
+          if (user) {
+            setConvState('AWAITING_ISSUE_TYPE');
+            setMessages(prev => [...prev, { id: Date.now()+1, text: "Please select the type of issue you'd like to report:", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+          } else {
+            setConvState('AWAITING_REGISTER');
+            setMessages(prev => [...prev, { id: Date.now()+1, text: "Please enter your name for guest registration.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+          }
+        }
+        else if (input.includes('register')) {
+          if (!user) {
+            setConvState('AWAITING_REGISTER');
+            setMessages(prev => [...prev, { id: Date.now()+1, text: "Please enter your full name for registration.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+          }
+        }
+        else if (input.includes('log')) {
+          if (!user) {
+            setConvState('AWAITING_LOGIN');
+            setMessages(prev => [...prev, { id: Date.now()+1, text: "Please enter your registered email.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+          }
         }
       } 
       else if (convState === 'AWAITING_LOGIN_FOR_STATUS') {
         try {
-          const userData = await login(text, '123');
-          setUser(userData);
-          
-          const res = await api.get(`/complaints/user/${userData.name}`);
+          const loginResp = await login(text, '123');
+          const loggedUser = loginResp.user;
+          setUser(loggedUser);
+
+          // Lookup complaints by email for accurate matching
+          const res = await api.get(`/complaints/user-email/${encodeURIComponent(text.trim().toLowerCase())}`);
           const complaints = res.data;
-          
+
           if (complaints.length === 0) {
-             setMessages(prev => [...prev, { id: Date.now()+1, text: `Welcome ${userData.name},\nYou have no active grievances recorded. Is there anything you'd like to report?`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
-             setConvState('CHAT');
+            setMessages(prev => [...prev, { id: Date.now()+1, text: `Welcome ${loggedUser.name},\nYou have no active grievances recorded. Is there anything you'd like to report?`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
+            setConvState('AWAITING_ISSUE_TYPE');
           } else {
-             const c = complaints[0]; 
-             setTempData({ ...tempData, current_complaint_id: c.id });
-             
-             let msgText = `Welcome back ${userData.name}.\n\nLatest Grievance Status:\nRef ID: ${c.id.slice(-6).toUpperCase()}\nStatus: ${c.status}\nCategory: ${c.category}\nWorker: ${c.assigned_worker ? c.assigned_worker.name : 'Pending Assignment'}`;
-             
-             if (c.status === 'Resolved') {
-               if (c.gps_coordinates) msgText += `\n📍 GPS: ${c.gps_coordinates}`;
-               
-               if (!c.rating) {
-                 setMessages(prev => [...prev, { 
-                   id: Date.now()+1, 
-                   text: msgText + "\n\n✅ This task was marked as Resolved by the worker. Please review the proof below.\n\nAre you satisfied with the work? Please reply 'Yes' to Close or 'No' to Reopen.", 
-                   image: (c.completion_image && c.completion_image !== "repair_site.jpg") ? c.completion_image : null,
-                   sender: 'bot', 
-                   time: new Date().toLocaleTimeString() 
-                 }]);
-                 setConvState('AWAITING_CLOSURE_CONFIRM');
-               } else {
-                 setMessages(prev => [...prev, { id: Date.now()+1, text: msgText + `\n⭐ Rating Given: ${c.rating}/5\n\nIs there anything else you'd like to do?`, image: (c.completion_image && c.completion_image !== "repair_site.jpg") ? c.completion_image : null, sender: 'bot', time: new Date().toLocaleTimeString() }]);
-                 setConvState('CHAT');
-               }
-             } else {
-               setMessages(prev => [...prev, { 
-                 id: Date.now()+1, 
-                 text: msgText + "\n\nIs there anything else I can help with?", 
-                 sender: 'bot', 
-                 time: new Date().toLocaleTimeString() 
-               }]);
-               setConvState('CHAT');
-             }
+            const c = complaints[0];
+            setTempData(prev => ({ ...prev, current_complaint_id: c._id || c.id }));
+
+            let msgText = `Welcome back ${loggedUser.name} 👋\n\n📋 Latest Grievance:\nRef ID: #${(c._id || c.id).slice(-6).toUpperCase()}\nStatus: ${c.status}\nCategory: ${c.category}\nPriority: ${c.priority}\nWorker: ${c.assigned_worker ? c.assigned_worker.name : 'Pending Assignment'}`;
+
+            if (c.status === 'Resolved') {
+              if (!c.rating) {
+                setMessages(prev => [...prev, {
+                  id: Date.now()+1,
+                  text: msgText + `\n\n✅ Task marked Resolved by ${c.assigned_worker?.name || 'worker'}.\nProof image attached below.\n\nAre you satisfied with the work done?\nClick Yes to Close or No to Reopen.`,
+                  image: (c.completion_image && c.completion_image !== 'repair_site.jpg') ? c.completion_image : null,
+                  sender: 'bot',
+                  time: new Date().toLocaleTimeString()
+                }]);
+                setConvState('AWAITING_CLOSURE_CONFIRM');
+              } else {
+                setMessages(prev => [...prev, {
+                  id: Date.now()+1,
+                  text: msgText + `\n\n⭐ You rated this: ${c.rating}/5\n\nThank you for your feedback! Is there anything else?`,
+                  image: (c.completion_image && c.completion_image !== 'repair_site.jpg') ? c.completion_image : null,
+                  sender: 'bot',
+                  time: new Date().toLocaleTimeString()
+                }]);
+                setConvState('AWAITING_ISSUE_TYPE');
+              }
+            } else {
+              setMessages(prev => [...prev, {
+                id: Date.now()+1,
+                text: msgText + `\n\n⏳ Your grievance is currently ${c.status}. Our field operative will resolve it shortly.\n\nWould you like to report another issue?`,
+                sender: 'bot',
+                time: new Date().toLocaleTimeString()
+              }]);
+              setConvState('AWAITING_ISSUE_TYPE');
+            }
           }
         } catch (e) {
-          setMessages(prev => [...prev, { id: Date.now()+1, text: "Authentication failed. Try 'gaurav.patil@example.com'.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+          console.error(e);
+          setMessages(prev => [...prev, { id: Date.now()+1, text: `Login failed. Please check your email and try again.`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
         }
       }
       else if (convState === 'AWAITING_LOGIN') {
         const userData = await login(text, '123');
-        setUser(userData);
-        setMessages(prev => [...prev, { id: Date.now()+1, text: `Authenticated as ${userData.name}. Please describe the municipal issue.`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
-        setConvState('CHAT');
+        setUser(userData.user);
+        setMessages(prev => [...prev, { id: Date.now()+1, text: `Authenticated as ${userData.user.name}.\n\nPlease select the type of issue you want to report:`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
+        setConvState('AWAITING_ISSUE_TYPE');
       }
       else if (convState === 'AWAITING_REGISTER') {
-          const userData = await register(text, text, '123', 'Mumbai');
-          setUser(userData);
-          setMessages(prev => [...prev, { id: Date.now()+1, text: `Welcome ${userData.name}. What municipal issue can I help with?`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
-          setConvState('CHAT');
+          // Step 1: Got the name, now ask for email
+          setTempData(prev => ({ ...prev, reg_name: text }));
+          setMessages(prev => [...prev, { id: Date.now()+1, text: `Nice to meet you, ${text}! Please enter your email address to complete registration.`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
+          setConvState('AWAITING_REGISTER_EMAIL');
+      }
+      else if (convState === 'AWAITING_REGISTER_EMAIL') {
+          // Step 2: Got the email, register the user then auto-login
+          const regEmail = text.trim().toLowerCase();
+          const regName = tempData.reg_name || regEmail;
+          try {
+            await register({ name: regName, email: regEmail, password: '123', city: 'Mumbai', phone: '0000000000' });
+          } catch (regErr) {
+            // If already registered (400), just proceed to login silently
+            const status = regErr?.response?.status;
+            if (status !== 400) throw regErr; // re-throw unexpected errors
+          }
+          // Auto-login after register (or if already existed)
+          const loginResp = await login(regEmail, '123');
+          const newUser = loginResp.user;
+          setUser(newUser);
+          localStorage.setItem('user', JSON.stringify(newUser));
+          setMessages(prev => [...prev, { id: Date.now()+1, text: `Welcome back ${newUser.name}! 🎉\n\nPlease select the type of issue you want to report:`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
+          setConvState('AWAITING_ISSUE_TYPE');
+      }
+      else if (convState === 'AWAITING_ISSUE_TYPE') {
+        // Citizen selected a category from buttons or typed one
+        setTempData(prev => ({ ...prev, selected_category: text }));
+        setMessages(prev => [...prev, { id: Date.now()+1, text: `You selected: ${text}\n\nPlease describe the issue in detail (location, severity, etc.):`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
+        setConvState('CHAT');
       }
       else if (convState === 'CHAT') {
+        // Use the pre-selected category if available, otherwise let AI predict
+        const selectedCategory = tempData.selected_category || null;
         const pred = await predictCategory(text);
-        setTempData({ ...tempData, complaint_text: text, pred_category: pred.category, pred_priority: pred.priority });
+        const finalCategory = selectedCategory || pred.category;
+        setTempData(prev => ({ ...prev, complaint_text: text, pred_category: finalCategory, pred_priority: pred.priority }));
         setMessages(prev => [...prev, { 
           id: Date.now()+1, 
-          text: `📊 AI Prediction:\nCategory: ${pred.category}\nPriority: ${pred.priority}\n\nIs this correct?`, 
+          text: `📊 AI Analysis:\nCategory: ${finalCategory}\nPriority: ${pred.priority}\n\nShall I submit this grievance?`, 
           sender: 'bot', 
           time: new Date().toLocaleTimeString() 
         }]);
@@ -202,7 +293,16 @@ const CitizenBot = () => {
         setConvState('CHAT');
       }
     } catch (e) {
-      setMessages(prev => [...prev, { id: Date.now()+1, text: "Technical error. Try again later.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+      console.error(e);
+      let errorMsg = "Technical error. Try again later.";
+      
+      if (e.response?.status === 422) {
+        errorMsg = "Invalid input format. Please check your email or data and try again.";
+      } else if (e.response?.data?.detail) {
+        errorMsg = e.response.data.detail;
+      }
+      
+      setMessages(prev => [...prev, { id: Date.now()+1, text: errorMsg, sender: 'bot', time: new Date().toLocaleTimeString() }]);
     } finally {
       setLoading(false);
     }
@@ -243,9 +343,19 @@ const CitizenBot = () => {
                     <div className="interactive-options">
                         {convState === 'AWAITING_AUTH_CHOICE' && (
                             <div className="btn-group">
-                                <button onClick={() => processResponse('Log In')} className="opt-btn">Log In</button>
-                                <button onClick={() => processResponse('Register')} className="opt-btn">Register</button>
-                                <button onClick={() => processResponse('Check Status')} className="opt-btn">Check Status</button>
+                                {user ? (
+                                    <>
+                                        <button onClick={() => processResponse('Report New Issue')} className="opt-btn">Report New Issue</button>
+                                        <button onClick={() => processResponse('Check Status')} className="opt-btn">Check Status</button>
+                                        <button onClick={handleLogout} className="opt-btn deny">Log Out</button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button onClick={() => processResponse('Log In')} className="opt-btn">Log In</button>
+                                        <button onClick={() => processResponse('Register')} className="opt-btn">Register</button>
+                                        <button onClick={() => processResponse('Check Status')} className="opt-btn">Check Status</button>
+                                    </>
+                                )}
                             </div>
                         )}
                         {convState === 'AWAITING_PREDICTION_CONFIRM' && (
@@ -260,7 +370,7 @@ const CitizenBot = () => {
                                 <button onClick={() => processResponse('No')} className="opt-btn deny">No, Reopen</button>
                             </div>
                         )}
-                        {convState === 'AWAITING_CATEGORY' && (
+                        {(convState === 'AWAITING_ISSUE_TYPE' || convState === 'AWAITING_CATEGORY') && (
                             <div className="category-options">
                                 {categories.map(c => <button key={c} onClick={() => processResponse(c)} className="cat-btn">{c}</button>)}
                             </div>
@@ -283,7 +393,6 @@ const CitizenBot = () => {
         <div className="chat-input shadow-lg">
           <input 
             type="text" 
-            placeholder="Describe your issue..." 
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && processResponse(inputText)}

@@ -180,22 +180,24 @@ const WorkerDashboard = () => {
                  <div className="task-list">
                     <h2>Completed Tasks History</h2>
                     <table className="gov-table">
-                       <thead>
-                         <tr>
-                           <th>Ref ID</th>
-                           <th>Category</th>
-                           <th>Completion Note</th>
-                           <th>Status</th>
-                         </tr>
-                       </thead>
+                        <thead>
+                          <tr>
+                            <th>Ref ID</th>
+                            <th>Category</th>
+                            <th>Citizen</th>
+                            <th>Completion Note</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
                        <tbody>
                          {completedTasks.map(task => (
-                           <tr key={task._id}>
-                             <td>#{task._id.slice(-5).toUpperCase()}</td>
-                             <td style={{ color: '#111827' }}>{task.category}</td>
-                             <td style={{ color: '#6B7280' }}>{task.completion_note || '--'}</td>
-                             <td><span style={{ color: '#16A34A', fontWeight: 'bold' }}>{task.status}</span></td>
-                           </tr>
+                            <tr key={task._id}>
+                              <td>#{task._id.slice(-5).toUpperCase()}</td>
+                              <td style={{ color: '#111827' }}>{task.category}</td>
+                              <td style={{ color: '#1e293b', fontWeight: '500' }}>{task.citizen_name}</td>
+                              <td style={{ color: '#6B7280' }}>{task.completion_note || '--'}</td>
+                              <td><span style={{ color: '#16A34A', fontWeight: 'bold' }}>{task.status}</span></td>
+                            </tr>
                          ))}
                        </tbody>
                     </table>

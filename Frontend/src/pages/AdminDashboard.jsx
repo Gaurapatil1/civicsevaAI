@@ -125,7 +125,7 @@ const AdminDashboard = () => {
     <div className="premium-admin-container">
       <aside className="admin-sidebar">
         <div className="sidebar-header">
-          <img src="/civicseva_logo.png" alt="Gov Logo" className="admin-sidebar-logo" />
+          <img src="/image-10.png" alt="Gov Logo" className="admin-sidebar-logo" />
           <div className="logo-text">
             <h3>CivicSeva AI</h3>
             <p>Administration Portal</p>
@@ -163,7 +163,7 @@ const AdminDashboard = () => {
       <main className="admin-main-content">
         <header className="admin-top-bar">
           <div className="header-logo-group">
-            <img src="/pngwing.com (1).png" alt="Emblem" className="header-gov-logo" />
+            <img src="/image-10.png" alt="Emblem" className="header-gov-logo" />
             <div className="header-logo-sep"></div>
             <div className="header-title">
               <h2>MUNICIPAL OPERATIONS COMMAND</h2>
@@ -179,10 +179,10 @@ const AdminDashboard = () => {
             <div className="header-icon-btn"><FiBell /><span className="notif-dot"></span></div>
             <div className="header-profile">
               <div className="profile-info">
-                <span className="p-role">Admin Officer</span>
+                <span className="p-role">Ketan Patil</span>
                 <span className="p-loc">{user?.city} Municipal HQ</span>
               </div>
-              <img src={`https://ui-avatars.com/api/?name=${user?.name}&background=003366&color=fff`} alt="Avatar" />
+              <img src="/image-10.png" alt="Avatar" style={{ borderRadius: '4px', border: '1px solid #D1D5DB' }} />
             </div>
           </div>
         </header>
@@ -260,8 +260,10 @@ const AdminDashboard = () => {
                     <tr>
                       <th>Ref ID</th>
                       <th>Category</th>
+                      <th>Citizen</th>
                       <th>Priority</th>
                       <th>Status</th>
+                      <th>Proof</th>
                       <th>Rating</th>
                       <th className="text-right">Actions</th>
                     </tr>
@@ -277,6 +279,9 @@ const AdminDashboard = () => {
                           </div>
                         </td>
                         <td>
+                          <div style={{ fontWeight: '500', color: '#1e293b' }}>{c.citizen_name}</div>
+                        </td>
+                        <td>
                           <span className={`p-badge ${c.priority.toLowerCase()}`}>{c.priority}</span>
                         </td>
                         <td>
@@ -284,6 +289,18 @@ const AdminDashboard = () => {
                             <span className={`s-dot ${c.status.toLowerCase().replace(' ', '-')}`}></span>
                             {c.status}
                           </div>
+                        </td>
+                        <td>
+                          {c.completion_image ? (
+                            <img 
+                              src={c.completion_image} 
+                              alt="Proof" 
+                              style={{ width: '35px', height: '35px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #D1D5DB', cursor: 'pointer' }}
+                              onClick={() => window.open(c.completion_image, '_blank')}
+                            />
+                          ) : (
+                            <span style={{ color: '#94a3b8' }}>N/A</span>
+                          )}
                         </td>
                         <td>
                           {c.rating ? (

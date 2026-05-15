@@ -77,10 +77,9 @@ const Login = () => {
 
             <form onSubmit={handleLogin} className="gov-form">
               <div className="gov-form-group">
-                <label>Username</label>
+                <label>Email Address</label>
                 <input 
                   type="text" 
-                  placeholder="xxxxxxxxxxxxxxxx"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required 
@@ -91,7 +90,6 @@ const Login = () => {
                 <label>Password</label>
                 <input 
                   type="password" 
-                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required 

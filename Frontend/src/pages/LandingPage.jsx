@@ -1,12 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiMessageSquare, FiX, FiCheckCircle, FiShield, FiTrendingUp, FiActivity, FiMapPin } from 'react-icons/fi';
+import { FiMessageSquare, FiX, FiCheckCircle, FiShield, FiTrendingUp, FiActivity, FiMapPin, FiStar } from 'react-icons/fi';
 import CitizenBot from './CitizenBot';
+import api from '../services/api';
 import './LandingPage.css';
+
+const StarRating = ({ rating }) => (
+  <div style={{ display: 'flex', gap: '2px', color: '#F59E0B' }}>
+    {[1,2,3,4,5].map(s => (
+      <FiStar key={s} fill={s <= rating ? '#F59E0B' : 'none'} size={16} />
+    ))}
+  </div>
+);
 
 const LandingPage = () => {
   const [isBotOpen, setIsBotOpen] = useState(false);
+  const [reviews, setReviews] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch real citizen reviews from resolved complaints
+    api.get('/complaints/reviews').then(res => {
+      setReviews(res.data || []);
+    }).catch(() => {});
+  }, []);
 
   const handleReportClick = () => {
     setIsBotOpen(true);
@@ -147,6 +164,37 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+
+      {/* Citizen Reviews Section */}
+      {reviews.length > 0 && (
+        <section style={{ background: '#f8fafc', padding: '60px 40px', borderTop: '1px solid #e2e8f0' }}>
+          <h2 style={{ textAlign: 'center', color: '#1a4f9c', fontWeight: 800, marginBottom: '8px' }}>Citizen Reviews</h2>
+          <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '40px' }}>Real feedback from citizens who used CivicSevaAI</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', maxWidth: '1100px', margin: '0 auto' }}>
+            {reviews.map((r, i) => (
+              <div key={i} style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)', border: '1px solid #e2e8f0' }}>
+                <StarRating rating={r.rating} />
+                <p style={{ color: '#374151', margin: '12px 0', lineHeight: '1.6', fontStyle: 'italic' }}>"{r.feedback || r.category + ' issue resolved promptly!'}"</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+                  <div>
+                    <strong style={{ color: '#1e293b', fontSize: '0.9rem' }}>{r.citizen_name}</strong>
+                    <span style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8' }}>{r.category}</span>
+                  </div>
+                  {r.completion_image && r.completion_image !== 'repair_site.jpg' && (
+                    <img
+                      src={r.completion_image}
+                      alt="Proof"
+                      onClick={() => window.open(r.completion_image, '_blank')}
+                      style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: '2px solid #1a4f9c' }}
+                      title="Click to view proof image"
+                    />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 3. Floating Complaint Bot */}
       <div className="floating-bot-container">

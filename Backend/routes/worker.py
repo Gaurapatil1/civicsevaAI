@@ -21,18 +21,21 @@ async def worker_login(payload: dict):
         raise HTTPException(status_code=500, detail="Database not connected.")
         
     email_regex = {"$regex": f"^{email}$", "$options": "i"}    
+    # Try workers collection first (Master Worker Data)
     found_worker = await db.db.workers.find_one({"email": email_regex})
     
     if not found_worker:
-        # Check users collection as well just in case seeded there (e.g. Test Worker)
+        # Fallback to users collection (Seeded Accounts)
         found_worker = await db.db.users.find_one({"email": email_regex, "role": "worker"})
         
     if not found_worker:
-        raise HTTPException(status_code=401, detail="Invalid Field Operative credentials.")
+        raise HTTPException(status_code=401, detail="Field Operative account not found.")
         
-    # In production use bcrypt, but following matching logic for seeded workers
-    if found_worker.get("password") != password:
-         raise HTTPException(status_code=401, detail="Invalid password.")
+    # Check against both possible password fields (legacy 'password' or 'password_hash')
+    stored_pw = found_worker.get("password") or found_worker.get("password_hash")
+    
+    if stored_pw != password:
+         raise HTTPException(status_code=401, detail="Incorrect password. Access denied.")
          
     return {
         "message": "Worker Login successful",
@@ -40,8 +43,8 @@ async def worker_login(payload: dict):
             "name": found_worker["name"],
             "email": found_worker["email"],
             "role": "worker",
-            "dept": found_worker.get("dept", "General"),
-            "worker_id": found_worker.get("worker_id", str(found_worker["_id"]))
+            "dept": found_worker.get("dept") or found_worker.get("department") or "General Operations",
+            "worker_id": str(found_worker.get("worker_id") or found_worker.get("_id"))
         },
         "token": "fake-jwt-token-worker"
     }
@@ -97,7 +100,15 @@ async def update_task(payload: dict):
         "resolved_at": datetime.utcnow()
     }
     
-    result = await db.db.complaints.update_one({"_id": complaint_id}, {"$set": update_data})
+    # Try to update by string ID or ObjectId
+    from bson import ObjectId
+    try:
+        obj_id = ObjectId(complaint_id)
+        result = await db.db.complaints.update_one({"$or": [{"_id": complaint_id}, {"_id": obj_id}]}, {"$set": update_data})
+    except:
+        # If not a valid ObjectId (like demo UUID strings), just use string
+        result = await db.db.complaints.update_one({"_id": complaint_id}, {"$set": update_data})
+        
     if result.modified_count == 0:
          raise HTTPException(status_code=400, detail="Failed to update complaint.")
          
