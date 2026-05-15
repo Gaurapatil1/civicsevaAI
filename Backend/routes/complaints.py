@@ -137,6 +137,17 @@ async def resolve_complaint(complaint_id: str, update: ResolutionUpdate):
 
     return {"status": "success", "message": "Complaint resolved successfully"}
 
+@router.get("/user/{citizen_name}")
+async def get_user_complaints(citizen_name: str):
+    if db.db is None:
+        raise HTTPException(status_code=500, detail="Database not connected.")
+    
+    cursor = db.db.complaints.find({"citizen_name": citizen_name}).sort("created_at", -1).limit(5)
+    complaints = await cursor.to_list(length=5)
+    for c in complaints:
+        c["id"] = c["_id"]
+    return complaints
+
 @router.get("/{complaint_id}")
 async def get_complaint(complaint_id: str):
     """

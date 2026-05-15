@@ -262,6 +262,7 @@ const AdminDashboard = () => {
                       <th>Category</th>
                       <th>Priority</th>
                       <th>Status</th>
+                      <th>Rating</th>
                       <th className="text-right">Actions</th>
                     </tr>
                   </thead>
@@ -283,6 +284,15 @@ const AdminDashboard = () => {
                             <span className={`s-dot ${c.status.toLowerCase().replace(' ', '-')}`}></span>
                             {c.status}
                           </div>
+                        </td>
+                        <td>
+                          {c.rating ? (
+                            <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>
+                              {c.rating} ★
+                            </span>
+                          ) : (
+                            <span style={{ color: '#64748b' }}>-</span>
+                          )}
                         </td>
                         <td className="text-right">
                           <button className="btn-view">Log</button>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiMessageSquare, FiX, FiCheckCircle, FiShield, FiTrendingUp, FiActivity, FiMapPin } from 'react-icons/fi';
 import CitizenBot from './CitizenBot';
@@ -33,7 +33,7 @@ const LandingPage = () => {
 
       {/* 2. Hero Section */}
       <section className="hero-section">
-        <div className="hero-overlay"></div>
+        <div className="hero-overlay" style={{ backgroundImage: `url('/image-1.png')` }}></div>
         <div className="hero-content">
           <h1 className="hero-title">AI-Powered Smart Grievance & Municipal Task Allocation Platform</h1>
           <p className="hero-subtitle">Improving complaint resolution efficiency using AI-driven prioritization and workforce optimization.</p>
@@ -132,9 +132,6 @@ const LandingPage = () => {
             <div className="stat-value">1,150</div>
             <div className="stat-label">Resolved Complaints</div>
           </div>
-        </div>
-        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-          <img src="/image-3.png" alt="System Interface Preview" style={{ maxWidth: '100%', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
         </div>
       </section>
 

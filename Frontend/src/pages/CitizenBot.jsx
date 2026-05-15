@@ -92,7 +92,11 @@ const CitizenBot = () => {
 
     try {
       if (convState === 'AWAITING_AUTH_CHOICE') {
-        if (text.toLowerCase().includes('log')) {
+        if (text.toLowerCase().includes('status')) {
+          setConvState('AWAITING_LOGIN_FOR_STATUS');
+          setMessages(prev => [...prev, { id: Date.now()+1, text: "For security, please log in with your registered email to view your grievance history.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+        }
+        else if (text.toLowerCase().includes('log')) {
           setConvState('AWAITING_LOGIN');
           setMessages(prev => [...prev, { id: Date.now()+1, text: "Please enter your registered email.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
         } else {
@@ -100,6 +104,53 @@ const CitizenBot = () => {
           setMessages(prev => [...prev, { id: Date.now()+1, text: "Please enter your name for guest registration.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
         }
       } 
+      else if (convState === 'AWAITING_LOGIN_FOR_STATUS') {
+        try {
+          const userData = await login(text, '123');
+          setUser(userData);
+          
+          const res = await api.get(`/complaints/user/${userData.name}`);
+          const complaints = res.data;
+          
+          if (complaints.length === 0) {
+             setMessages(prev => [...prev, { id: Date.now()+1, text: `Welcome ${userData.name},\nYou have no active grievances recorded. Is there anything you'd like to report?`, sender: 'bot', time: new Date().toLocaleTimeString() }]);
+             setConvState('CHAT');
+          } else {
+             const c = complaints[0]; 
+             setTempData({ ...tempData, current_complaint_id: c.id });
+             
+             let msgText = `Welcome back ${userData.name}.\n\nLatest Grievance Status:\nRef ID: ${c.id.slice(-6).toUpperCase()}\nStatus: ${c.status}\nCategory: ${c.category}\nWorker: ${c.assigned_worker ? c.assigned_worker.name : 'Pending Assignment'}`;
+             
+             if (c.status === 'Resolved') {
+               if (c.gps_coordinates) msgText += `\n📍 GPS: ${c.gps_coordinates}`;
+               
+               if (!c.rating) {
+                 setMessages(prev => [...prev, { 
+                   id: Date.now()+1, 
+                   text: msgText + "\n\n✅ This task was marked as Resolved by the worker. Please review the proof below.\n\nAre you satisfied with the work? Please reply 'Yes' to Close or 'No' to Reopen.", 
+                   image: (c.completion_image && c.completion_image !== "repair_site.jpg") ? c.completion_image : null,
+                   sender: 'bot', 
+                   time: new Date().toLocaleTimeString() 
+                 }]);
+                 setConvState('AWAITING_CLOSURE_CONFIRM');
+               } else {
+                 setMessages(prev => [...prev, { id: Date.now()+1, text: msgText + `\n⭐ Rating Given: ${c.rating}/5\n\nIs there anything else you'd like to do?`, image: (c.completion_image && c.completion_image !== "repair_site.jpg") ? c.completion_image : null, sender: 'bot', time: new Date().toLocaleTimeString() }]);
+                 setConvState('CHAT');
+               }
+             } else {
+               setMessages(prev => [...prev, { 
+                 id: Date.now()+1, 
+                 text: msgText + "\n\nIs there anything else I can help with?", 
+                 sender: 'bot', 
+                 time: new Date().toLocaleTimeString() 
+               }]);
+               setConvState('CHAT');
+             }
+          }
+        } catch (e) {
+          setMessages(prev => [...prev, { id: Date.now()+1, text: "Authentication failed. Try 'gaurav.patil@example.com'.", sender: 'bot', time: new Date().toLocaleTimeString() }]);
+        }
+      }
       else if (convState === 'AWAITING_LOGIN') {
         const userData = await login(text, '123');
         setUser(userData);
@@ -194,6 +245,7 @@ const CitizenBot = () => {
                             <div className="btn-group">
                                 <button onClick={() => processResponse('Log In')} className="opt-btn">Log In</button>
                                 <button onClick={() => processResponse('Register')} className="opt-btn">Register</button>
+                                <button onClick={() => processResponse('Check Status')} className="opt-btn">Check Status</button>
                             </div>
                         )}
                         {convState === 'AWAITING_PREDICTION_CONFIRM' && (

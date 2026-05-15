@@ -5,6 +5,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import WorkerDashboard from './pages/WorkerDashboard';
+import WorkerLogin from './pages/WorkerLogin';
 import './App.css';
 
 // Protected Route for Officers/Admins
@@ -34,6 +35,7 @@ function App() {
           <Route path="/bot" element={<CitizenBot />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/worker-login" element={<WorkerLogin />} />
           
           <Route path="/admin" element={
             <AdminRoute role="admin">
